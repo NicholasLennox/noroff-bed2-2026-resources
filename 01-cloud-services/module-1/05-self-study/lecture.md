@@ -29,7 +29,7 @@ Read:
 
 **InfoQ — Microsoft Claims Reduction in Cloud Cost from Migrating Internal Services to .NET 6**
 
-[Read the article](https://www.infoq.com/news/2022/10/microsoft-dotnet-6-reduces-cost/?utm_source=chatgpt.com)
+[Read the article](https://www.infoq.com/news/2022/10/microsoft-dotnet-6-reduces-cost)
 
 This case looks at how changes to the software itself can affect the infrastructure required to run it. Microsoft found that moving internal services to .NET 6 created opportunities for greater efficiency and lower cloud costs.
 
@@ -46,7 +46,7 @@ Read:
 
 **Amazon Prime Video Technology Blog — Scaling up the Prime Video audio/video monitoring service and reducing costs by 90%**
 
-This is an example we have already discussed in class.
+[Read the article](https://www.infoq.com/news/2023/05/prime-ec2-ecs-saves-costs)
 
 The interesting part of this case is how the team reconsidered its architecture based on the actual behaviour of the workload. The workload remained within AWS, but a different architectural approach proved to be a much better fit.
 
@@ -65,7 +65,7 @@ Read:
 
 **Fortune — Dropbox IPO cloud stock**
 
-[Read the article](https://fortune.com/2018/02/23/dropbox-ipo-cloud-stock?utm_source=chatgpt.com)
+[Read the article](https://fortune.com/2018/02/23/dropbox-ipo-cloud-stock)
 
 Dropbox provides a different perspective. As its infrastructure requirements grew, the company reconsidered where some of its workloads should run and invested in its own infrastructure.
 
@@ -85,7 +85,7 @@ If you have additional time, read:
 
 **Fortune — Microsoft Claims Another Cloud Win as Symantec Moves Onto Azure**
 
-[Read the article](https://fortune.com/2017/10/16/microsoft-azure-cloud-symantec?utm_source=chatgpt.com)
+[Read the article](https://fortune.com/2017/10/16/microsoft-azure-cloud-symantec)
 
 We will be working with Azure later in the course. This case provides an example of a large organisation moving workloads onto Microsoft's cloud platform.
 
