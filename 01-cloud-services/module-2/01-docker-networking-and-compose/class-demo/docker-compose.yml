@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: todos
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin123
+    ports:
+      - "3307:3306"
+
+  app:
+    image: todo-api
+    container_name: todo-api
+    profiles:
+      - app
+    environment:
+      ENVIRONMENT: docker
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: todos
+      DB_USER: admin
+      DB_PASSWORD: admin123
+      DB_DIALECT: mysql
+    ports:
+      - "3000:3000"
