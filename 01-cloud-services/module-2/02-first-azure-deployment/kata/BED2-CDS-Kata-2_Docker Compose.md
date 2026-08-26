@@ -6,7 +6,7 @@ You are given a working product API. The three endpoints do what they should and
 
 This kata adds no features. By the end the API still has the same three endpoints. What changes is the layer underneath them: where the configuration comes from, and whether the running application can tell you anything useful about itself. Those two things decide whether an application can be deployed, and they are exactly what the starter is missing.
 
-Work from the references rather than from AI - a good part of this exercise is learning to find the right key in a Compose file and the right option in the Sequelize docs.
+Try work from the references rather than from AI - a good part of this exercise is learning to find the right key in a Compose file and the right option in the Sequelize docs.
 
 - Sequelize: https://sequelize.org/docs/v6/getting-started/
 - dotenv: https://www.npmjs.com/package/dotenv
