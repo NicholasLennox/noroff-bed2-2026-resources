@@ -3,6 +3,7 @@ node_modules
 **.pdf
 **/plan-*/
 kata-plan.md
+kata-steps.md
 lecture-steps.md
 CLAUDE.md
 .claude
