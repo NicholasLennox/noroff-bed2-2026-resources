@@ -180,6 +180,24 @@ Platform logs are Azure managing the container around your code:
 
 `CreatingContainer`, `Container start method finished after 4442 ms`, `InitiatingSiteWarmUpProbe`, `WarmUpProbeSucceeded`, `Site started`. None of this comes from your app, and this is the list to go to when the app never gets far enough to log anything of its own. A deployment that silently does not happen leaves its explanation here.
 
+### 6.3 One error you can ignore
+
+Watch the application log through a redeploy and you will see this, in red, just after the new version has started answering:
+
+![npm reporting an error as the old container is stopped](./images/15-npm-container-restart-error.png)
+
+Two things say it is not a fault. The `[Previous Container]` prefix — during a swap there are briefly two containers, and Azure labels the lines coming from the one being replaced. And the clock: the new container logged `Server running on port 3000` at `07:50:54`, and these arrive at `07:51:17`, once it was safe to stop the old one.
+
+What you are reading is a shutdown reported as a failure. Our Dockerfile ends with `CMD ["npm", "start"]`, so `npm` is the container's main process and the app runs beneath it as `sh -c node app.js`. Stopping a container sends **`SIGTERM`** *[the "please shut down" signal: a process is asked to stop and given a moment to do it, rather than being killed outright]* to that main process. npm sees the command it was running end on a signal, treats that as a failed command, and prints `npm error`. Nothing crashed.
+
+There is a different way to write that last line:
+
+```dockerfile
+CMD ["node", "app.js"]
+```
+
+Node's own Docker guidance prefers it, because it "causes exit signals such as `SIGTERM` and `SIGINT` to be received by the Node.js process instead of npm swallowing them". That starts to matter when an app has something to do on the way out — connections to close, work to finish. Ours does not, so leave the Dockerfile as it is and just recognise the red text next time you see it.
+
 ## 7. When the credentials were never there
 
 Now the failure, which is the one you are most likely to hit, and it comes from doing section 5's two steps in the other order.
@@ -208,8 +226,6 @@ A `401 Unauthorized`, on the webhook's own event log on the ACR side. Which is a
 
 Then check both ends. The App Service should show a populated Webhook URL, and the ACR should have a fresh webhook whose URL contains credentials rather than `REDACTED`:
 
-![SCM basic auth re-enabled, with a real webhook URL](./images/13-scm-reenabled.png)
-
 > A generated credential is a snapshot, not a live link. Change what it was made from and it does not follow — it has to be made again.
 
 ## 8. Where to look when it breaks
@@ -229,3 +245,4 @@ Then check both ends. The App Service should show a populated Webhook URL, and t
 2. Red Hat, *What is a webhook?* — [redhat.com/en/topics/automation/what-is-a-webhook](https://www.redhat.com/en/topics/automation/what-is-a-webhook)
 3. Microsoft Learn, *Azure Container Registry webhook schema reference* — [learn.microsoft.com/en-us/azure/container-registry/container-registry-webhook-reference](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-webhook-reference)
 4. Azure App Service OSS blog, *Using Webhooks for image pulls with Web App for Containers* — [azureossd.github.io/2025/12/16/Using-Webhooks-for-image-pulls-with-Web-App-for-Containers](https://azureossd.github.io/2025/12/16/Using-Webhooks-for-image-pulls-with-Web-App-for-Containers/)
+5. Node.js, *Docker and Node.js Best Practices* (the `CMD` and *Handling Kernel Signals* sections) — [github.com/nodejs/docker-node/blob/main/docs/BestPractices.md](https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md)

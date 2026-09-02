@@ -54,7 +54,7 @@ This kata is split into 3 stages: the first is a fully manual deployment, the se
 
 ### Steps
 
-1. On the App Service, go to and turn on **SCM Basic Auth Publishing Credentials**. Save.
+1. On the App Service, go and turn on **SCM Basic Auth Publishing Credentials**. Save.
 2. Go to **Deployment → Deployment Center**, tick **Continuous deployment**, and save. The **Webhook URL** field should fill in with a long masked value. If it instead says SCM basic authentication is disabled, step 1 did not save - go back and check.
 3. Look at the structure of that URL. It is `https://<user>:<password>@<something>/api/registry/webhook`
 4. Now go to your **registry → Services → Webhooks**. There is one there that you did not create. Open it and read two fields on the Essentials panel:
@@ -71,7 +71,6 @@ This kata is split into 3 stages: the first is a fully manual deployment, the se
 ### Reflection
 
 - Two things now exist that did not before: a webhook on the registry, and a set of credentials on the App Service. You created one of them with a checkbox and Azure created the other for you. Which is which, and which of the two holds the URL?
-- `DOCKER_ENABLE_CI` appeared in your app settings without you typing it. What put it there?
 
 ## Stage 3: Fire it
 
