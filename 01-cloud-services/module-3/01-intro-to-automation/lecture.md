@@ -1,6 +1,6 @@
 # Automating a Deployment: Webhooks and the SCM Sidecar
 
-> Everything we have deployed so far has needed a human at the end of it. We push an image, and then we go and tell Azure to use it. This lesson removes that last step, and the removal is one checkbox — which makes it a poor lesson about clicking and a good one about what has to be true underneath before the checkbox does anything. The central failure is a webhook that fires perfectly and gets a `401` back, because the credentials it needed were never created. Where a word might be new, a plain-English version follows it in *[brackets]*.
+> Everything we have deployed so far has needed a human at the end of it. We push an image, and then we go and tell Azure to use it. This lesson removes that last step, and the removal is one checkbox - which makes it a poor lesson about clicking and a good one about what has to be true underneath before the checkbox does anything. The central failure is a webhook that fires perfectly and gets a `401` back, because the credentials it needed were never created. Where a word might be new, a plain-English version follows it in *[brackets]*.
 
 ## 1. Where we left off
 
@@ -10,11 +10,11 @@ The workflow, in the state we ended the week in:
 
 ![Recap of the Docker to ACR to App Service path](./boards/01-lesson-overview.jpeg)
 
-In black, what we already had. Make a change locally, `docker build`, `docker tag`, and — with a credential already in `~/.docker/config.json` from `az acr login` — `docker push` to the registry. On the Azure side, an App Service configured to pull `greeting-api:latest` from `beddemo`:
+In black, what we already had. Make a change locally, `docker build`, `docker tag`, and - with a credential already in `~/.docker/config.json` from `az acr login` - `docker push` to the registry. On the Azure side, an App Service configured to pull `greeting-api:latest` from `beddemo`:
 
 ![The App Service container settings, pointing at the ACR](./images/01-app-service-config.png)
 
-The authentication row is the piece worth re-reading, because it is the one that is already automated. **Managed Identity**, with `ua-id-ad15` selected — and that identity holds the `AcrPull` role on `beddemo`:
+The authentication row is the piece worth re-reading, because it is the one that is already automated. **Managed Identity**, with `ua-id-ad15` selected - and that identity holds the `AcrPull` role on `beddemo`:
 
 ![The managed identity's role assignment on the registry](./images/01-2-managed-identity.png)
 
@@ -28,13 +28,13 @@ We started by running the old workflow. Change a line in `app.js`, build, tag, p
 
 Then we hit `/greeting` on the running app and got the old response.
 
-Nothing is broken. The App Service is running the container it pulled the last time it was told to pull, and it has no reason to believe anything has changed. A registry does not announce its pushes, and a running container does not go looking. The two halves of the workflow were never connected — we were the connection, and this time we did not do our half.
+Nothing is broken. The App Service is running the container it pulled the last time it was told to pull, and it has no reason to believe anything has changed. A registry does not announce its pushes, and a running container does not go looking. The two halves of the workflow were never connected - we were the connection, and this time we did not do our half.
 
 ### 2.1 The restart button, and the misconception it breeds
 
 The fix by hand is on the Overview blade: **Restart**. The App Service stops the container, pulls `greeting-api:latest` again, gets the new digest this time, and starts it. Hit `/greeting` a minute or two later and the new response is there.
 
-That is worth doing deliberately once, because it is the thing that gets mistaken for automation later. Saving a change on the Configuration or Environment variables blade also restarts the app — which means that if you tick a box, save it, and see your new version appear, **you have not necessarily proved the box works**. You proved that saving restarted the container, and the restart pulled the image. The two are indistinguishable from the outside unless you go and check whether the mechanism actually fired.
+That is worth doing deliberately once, because it is the thing that gets mistaken for automation later. Saving a change on the Configuration or Environment variables blade also restarts the app - which means that if you tick a box, save it, and see your new version appear, **you have not necessarily proved the box works**. You proved that saving restarted the container, and the restart pulled the image. The two are indistinguishable from the outside unless you go and check whether the mechanism actually fired.
 
 > Restarting the App Service is a deployment. Automating the deployment means automating the restart.
 
@@ -42,17 +42,17 @@ That is worth doing deliberately once, because it is the thing that gets mistake
 
 So we need the registry to *tell* somebody. That is what the second option in the Deployment Center is for, and it is worth naming the pattern before wiring it up, because it turns up everywhere: payment providers telling your shop that a payment cleared, GitHub telling a build server that a branch moved, a chat platform telling your bot that someone typed.
 
-The version of this you already know is a client asking a server for something. The client wants data, sends a request, gets a response. If the data is not ready yet, the client waits and asks again — **polling** *[repeatedly asking "is it there yet?" on a timer]*. Polling is wasteful in both directions: most requests come back with nothing, and however short you make the interval, you are still that far behind the event.
+The version of this you already know is a client asking a server for something. The client wants data, sends a request, gets a response. If the data is not ready yet, the client waits and asks again - **polling** *[repeatedly asking "is it there yet?" on a timer]*. Polling is wasteful in both directions: most requests come back with nothing, and however short you make the interval, you are still that far behind the event.
 
 A **webhook** inverts it. The party that will eventually have the data is given, in advance, a URL to call. When the event happens, *it* makes an HTTP `POST` to that URL carrying the details as a JSON payload. Red Hat's write-up (linked in the sources) calls them "reverse APIs" for this reason: the roles are the same, the direction of the first move is flipped. Nobody asks. The event arrives.
 
-Which reframes what we need. There is an event — an image pushed to `greeting-api:latest` — and there is something that needs to know about it. The registry can be given a URL. The question is what URL, and what is on the other end of it.
+Which reframes what we need. There is an event - an image pushed to `greeting-api:latest` - and there is something that needs to know about it. The registry can be given a URL. The question is what URL, and what is on the other end of it.
 
 ## 4. The SCM sidecar: who is listening
 
 The answer is not the container running your API, and this is the part that needs building up carefully, because your API cannot restart itself.
 
-When Azure provisions an App Service, it does not only start your container. It creates an environment around it: somewhere to keep files, somewhere the configuration lives, and a separate service that manages the whole thing. That service is called the **SCM** — Source Control Manager — and by its project name, **Kudu**. It runs as a **sidecar** *[a second container deployed alongside the main one, sharing its environment, whose job is to support the main container rather than to serve your users]*.
+When Azure provisions an App Service, it does not only start your container. It creates an environment around it: somewhere to keep files, somewhere the configuration lives, and a separate service that manages the whole thing. That service is called the **SCM** - Source Control Manager - and by its project name, **Kudu**. It runs as a **sidecar** *[a second container deployed alongside the main one, sharing its environment, whose job is to support the main container rather than to serve your users]*.
 
 The clearest evidence that it is a separate thing is in the URLs. Our app is at:
 
@@ -66,7 +66,7 @@ and its SCM service is at:
 https://greeting-aafwcke7hvhzevhg.scm.westeurope-01.azurewebsites.net/
 ```
 
-Same host, one extra subdomain. Azure uses subdomains as structure — `westeurope-01` says where in Azure this is running, and `.scm.` says which of the two services you are talking to.
+Same host, one extra subdomain. Azure uses subdomains as structure - `westeurope-01` says where in Azure this is running, and `.scm.` says which of the two services you are talking to.
 
 Kudu is the one that holds the platform controls. It feeds configuration into your container, it can restart it, and it exposes an HTTP API for doing so. One of the endpoints on that API is `/api/registry/webhook`, which accepts a `POST` and responds by pulling the image again and restarting the container.
 
@@ -76,7 +76,7 @@ So the listener is the SCM service, and the App Service plus its sidecar behave 
 
 ## 5. The green path
 
-We built this the way it is meant to work first, so that the failure in section 7 is recognisable as a failure. There are two settings, and **the order matters** — which is the whole reason this section has an order at all.
+We built this the way it is meant to work first, so that the failure in section 7 is recognisable as a failure. There are two settings, and **the order matters** - which is the whole reason this section has an order at all.
 
 ### 5.1 SCM basic auth, first
 
@@ -86,7 +86,7 @@ We built this the way it is meant to work first, so that the failure in section 
 
 This creates a username and password for the SCM service. **Basic auth** *[the simplest HTTP authentication scheme: a username and password sent with the request itself, rather than exchanged for a token first]* is the mechanism Kudu's webhook endpoint uses, and until this is on, no such credentials exist.
 
-You can get here from the Deployment Center too — the **Enable here** link next to the Webhook URL field goes to the same place.
+You can get here from the Deployment Center too - the **Enable here** link next to the Webhook URL field goes to the same place.
 
 ### 5.2 Tick continuous deployment
 
@@ -100,7 +100,7 @@ The Webhook URL field fills in. That is the sign it worked, and its shape is:
 https://<$username>:<password>@<app-name>.scm.azurewebsites.net/api/registry/webhook
 ```
 
-The credentials are *in the URL*, in front of the host. That form is how basic auth is carried when nobody is around to be prompted for a password — the caller is a registry, not a person. It also means the URL and the credential are the same object: anyone holding that string can restart your app. Treat it exactly as you would a password, which is why the portal shows it as dots.
+The credentials are *in the URL*, in front of the host. That form is how basic auth is carried when nobody is around to be prompted for a password - the caller is a registry, not a person. It also means the URL and the credential are the same object: anyone holding that string can restart your app. Treat it exactly as you would a password, which is why the portal shows it as dots.
 
 The username begins with a `$`. The explanation I have seen for this is that it stops the surrounding system from reading the name as a variable to be substituted; that is plausible but is not something I can point you at documentation for, so hold it loosely.
 
@@ -110,7 +110,7 @@ Ticking that box did a second thing. Over on the registry, **Services → Webhoo
 
 ![The webhook Azure created on the ACR](./images/04-webhook-acr.png)
 
-Read the two boxed fields, because they are the whole configuration. **Actions: push** — it fires on a push and nothing else. **Scope: `greeting-api:latest`** — that repository, that tag. Push `greeting-api:v2` and this webhook stays quiet.
+Read the two boxed fields, because they are the whole configuration. **Actions: push** - it fires on a push and nothing else. **Scope: `greeting-api:latest`** - that repository, that tag. Push `greeting-api:v2` and this webhook stays quiet.
 
 So the wiring, stated once: the App Service generated a URL to itself with its own credentials embedded, and Azure handed that URL to the registry to call. The registry is now the party that makes the first move.
 
@@ -120,7 +120,7 @@ Change `app.js`, build, tag, push. Then open the webhook on the ACR side and loo
 
 ![The webhook firing with a 202 response](./images/05-webhook-202.png)
 
-A `202 Accepted` — the request got through and the work has been started, but is not finished. That is the right code for this: Kudu is not going to hold the connection open while it pulls an image and restarts a container.
+A `202 Accepted` - the request got through and the work has been started, but is not finished. That is the right code for this: Kudu is not going to hold the connection open while it pulls an image and restarts a container.
 
 Give it a couple of minutes and `/greeting` returns the new response. We have automated the restart button.
 
@@ -158,17 +158,17 @@ The header names the app, the platform version and the specific **instance** you
 
 **Environment → Settings & Variables** lists every setting the platform is feeding into your container. This is the fastest way to check that a variable you configured in the portal is genuinely reaching the app, rather than sitting in a form you forgot to save.
 
-Add `TEST` with the value `testvalue` under the App Service's Environment variables blade, save — which restarts the app — and it appears here:
+Add `TEST` with the value `testvalue` under the App Service's Environment variables blade, save - which restarts the app - and it appears here:
 
 ![The TEST setting visible in Kudu's App Settings](./images/07-2-app-settings.png)
 
-Two other rows in that list are worth noticing, because they are what the last section did. `DOCKER_ENABLE_CI = true` is the app setting behind the Continuous deployment checkbox — the box is a nicer way of writing this. And `WEBSITE_DEFAULT_HOSTNAME` holds the same hostname we compared against the `.scm.` one earlier. Most of the settings here are Azure's own, and reading them is a reasonable way to find out what the platform thinks it is doing.
+Two other rows in that list are worth noticing, because they are what the last section did. `DOCKER_ENABLE_CI = true` is the app setting behind the Continuous deployment checkbox - the box is a nicer way of writing this. And `WEBSITE_DEFAULT_HOSTNAME` holds the same hostname we compared against the `.scm.` one earlier. Most of the settings here are Azure's own, and reading them is a reasonable way to find out what the platform thinks it is doing.
 
 ### 6.2 Two kinds of log
 
 **Logs & Diagnostics** splits into **Application** and **Platform**, and the split is the useful part. These are the same logs the App Service's Log Stream blade shows, in a view that is considerably easier to read.
 
-Application logs are your container's stdout — the process you wrote:
+Application logs are your container's stdout - the process you wrote:
 
 ![Application logs, showing the API start up](./images/08-application-logs.png)
 
@@ -186,7 +186,7 @@ Watch the application log through a redeploy and you will see this, in red, just
 
 ![npm reporting an error as the old container is stopped](./images/15-npm-container-restart-error.png)
 
-Two things say it is not a fault. The `[Previous Container]` prefix — during a swap there are briefly two containers, and Azure labels the lines coming from the one being replaced. And the clock: the new container logged `Server running on port 3000` at `07:50:54`, and these arrive at `07:51:17`, once it was safe to stop the old one.
+Two things say it is not a fault. The `[Previous Container]` prefix - during a swap there are briefly two containers, and Azure labels the lines coming from the one being replaced. And the clock: the new container logged `Server running on port 3000` at `07:50:54`, and these arrive at `07:51:17`, once it was safe to stop the old one.
 
 What you are reading is a shutdown reported as a failure. Our Dockerfile ends with `CMD ["npm", "start"]`, so `npm` is the container's main process and the app runs beneath it as `sh -c node app.js`. Stopping a container sends **`SIGTERM`** *[the "please shut down" signal: a process is asked to stop and given a moment to do it, rather than being killed outright]* to that main process. npm sees the command it was running end on a signal, treats that as a failed command, and prints `npm error`. Nothing crashed.
 
@@ -196,7 +196,7 @@ There is a different way to write that last line:
 CMD ["node", "app.js"]
 ```
 
-Node's own Docker guidance prefers it, because it "causes exit signals such as `SIGTERM` and `SIGINT` to be received by the Node.js process instead of npm swallowing them". That starts to matter when an app has something to do on the way out — connections to close, work to finish. Ours does not, so leave the Dockerfile as it is and just recognise the red text next time you see it.
+Node's own Docker guidance prefers it, because it "causes exit signals such as `SIGTERM` and `SIGINT` to be received by the Node.js process instead of npm swallowing them". That starts to matter when an app has something to do on the way out - connections to close, work to finish. Ours does not, so leave the Dockerfile as it is and just recognise the red text next time you see it.
 
 ## 7. When the credentials were never there
 
@@ -206,7 +206,7 @@ Suppose you go straight to the Deployment Center and tick Continuous deployment 
 
 ![Continuous deployment ticked with SCM basic auth still disabled](./images/11-scm-disabled.png)
 
-No URL — just the notice that SCM basic authentication is disabled. And the URL that did get sent to the registry has nothing to put in the credential slots:
+No URL - just the notice that SCM basic authentication is disabled. And the URL that did get sent to the registry has nothing to put in the credential slots:
 
 ```
 https://REDACTED:REDACTED@greeting-aafwcke7hvhzevhg.scm.westeurope-01.azurewebsites.net/api/registry/webhook
@@ -226,7 +226,7 @@ A `401 Unauthorized`, on the webhook's own event log on the ACR side. Which is a
 
 Then check both ends. The App Service should show a populated Webhook URL, and the ACR should have a fresh webhook whose URL contains credentials rather than `REDACTED`:
 
-> A generated credential is a snapshot, not a live link. Change what it was made from and it does not follow — it has to be made again.
+> A generated credential is a snapshot, not a live link. Change what it was made from and it does not follow - it has to be made again.
 
 ## 8. Where to look when it breaks
 
@@ -236,13 +236,13 @@ Then check both ends. The App Service should show a populated Webhook URL, and t
 | Webhook event log shows `401` | App Service → Configuration → Platform settings | SCM basic auth was off when the webhook URL was generated |
 | Webhook URL field is empty in the Deployment Center | Same place | SCM basic auth is disabled |
 | Webhook exists but never fires on push | ACR → the webhook's **Scope** field | The scope names a different repository or tag than the one you pushed |
-| The new version appeared, but only after you saved a setting | — | The save restarted the app; the webhook is not proven to work |
+| The new version appeared, but only after you saved a setting | - | The save restarted the app; the webhook is not proven to work |
 | A variable you set is not visible to your code | Kudu → Environment → Settings & Variables | It was not saved, or was set on the wrong app |
 
 ## 9. Sources
 
-1. Microsoft Learn, *Kudu service overview* — [learn.microsoft.com/en-us/azure/app-service/resources-kudu](https://learn.microsoft.com/en-us/azure/app-service/resources-kudu)
-2. Red Hat, *What is a webhook?* — [redhat.com/en/topics/automation/what-is-a-webhook](https://www.redhat.com/en/topics/automation/what-is-a-webhook)
-3. Microsoft Learn, *Azure Container Registry webhook schema reference* — [learn.microsoft.com/en-us/azure/container-registry/container-registry-webhook-reference](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-webhook-reference)
-4. Azure App Service OSS blog, *Using Webhooks for image pulls with Web App for Containers* — [azureossd.github.io/2025/12/16/Using-Webhooks-for-image-pulls-with-Web-App-for-Containers](https://azureossd.github.io/2025/12/16/Using-Webhooks-for-image-pulls-with-Web-App-for-Containers/)
-5. Node.js, *Docker and Node.js Best Practices* (the `CMD` and *Handling Kernel Signals* sections) — [github.com/nodejs/docker-node/blob/main/docs/BestPractices.md](https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md)
+1. Microsoft Learn, *Kudu service overview* - [learn.microsoft.com/en-us/azure/app-service/resources-kudu](https://learn.microsoft.com/en-us/azure/app-service/resources-kudu)
+2. Red Hat, *What is a webhook?* - [redhat.com/en/topics/automation/what-is-a-webhook](https://www.redhat.com/en/topics/automation/what-is-a-webhook)
+3. Microsoft Learn, *Azure Container Registry webhook schema reference* - [learn.microsoft.com/en-us/azure/container-registry/container-registry-webhook-reference](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-webhook-reference)
+4. Azure App Service OSS blog, *Using Webhooks for image pulls with Web App for Containers* - [azureossd.github.io/2025/12/16/Using-Webhooks-for-image-pulls-with-Web-App-for-Containers](https://azureossd.github.io/2025/12/16/Using-Webhooks-for-image-pulls-with-Web-App-for-Containers/)
+5. Node.js, *Docker and Node.js Best Practices* (the `CMD` and *Handling Kernel Signals* sections) - [github.com/nodejs/docker-node/blob/main/docs/BestPractices.md](https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md)
