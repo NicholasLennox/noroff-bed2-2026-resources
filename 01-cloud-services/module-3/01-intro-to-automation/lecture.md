@@ -138,7 +138,7 @@ The whole loop, with the credential used at each hop:
     |                     |   (admin creds / MI)     |
 ```
 
-Three hops, three different credentials, and none of them interchangeable. The token from `az acr login` gets your push in and expires in three hours. The basic auth pair in the webhook URL gets the registry's `POST` past the SCM gatekeeper. The managed identity gets the App Service back into the registry to pull. Every failure in the next two sections is one of these three arrows being unable to prove who it is.
+Three hops, three different credentials, and none of them interchangeable. The token from `az acr login` gets your push in and expires in three hours. The basic auth pair in the webhook URL gets the registry's `POST` past the SCM gatekeeper. The managed identity gets the App Service back into the registry to pull. Only the middle one is ours to arrange, and it is the one that breaks in section 7.
 
 That is also a fair first impression of what automation work feels like. The mechanism itself is a `POST`. Almost everything you actually do is setup, permissions, and finding out which of the two ends is unhappy.
 
@@ -212,23 +212,7 @@ Then check both ends. The App Service should show a populated Webhook URL, and t
 
 > A generated credential is a snapshot, not a live link. Change what it was made from and it does not follow — it has to be made again.
 
-## 8. A different kind of "unauthorized"
-
-One more thing turns up in the platform logs, and it is worth being able to tell apart from the `401` above, because both are credential problems and they are not the same credential problem:
-
-![ImagePullUnauthorizedFailure in the platform logs](./images/10-missing-creds-error-log.png)
-
-```
-State: Stopping, Action: StoppingSite, LastError: ImagePullUnauthorizedFailure,
-LastErrorDetails: Failed to pull image: beddemo.azurecr.io/greeting-api:latest.
-Image pull failed with forbidden or unauthorized. Check registry credentials.
-```
-
-Read the direction of travel. This is the App Service failing to get *into the registry* — the arrow from section 1, the one the managed identity holds the `AcrPull` role for. It has nothing to do with SCM basic auth or the webhook. The webhook is about getting a message *in* to your app; this is about your app reaching *out* to ACR.
-
-Which one you are looking at tells you where to go. A `401` on the ACR webhook event log means the SCM credentials. `ImagePullUnauthorizedFailure` in the platform logs means the identity and its role assignment. We will come back to that second one properly, and to what has to be arranged by hand when there is no managed identity to do it for you.
-
-## 9. Where to look when it breaks
+## 8. Where to look when it breaks
 
 | Symptom | Where to look | Usual cause |
 |---|---|---|
@@ -237,10 +221,9 @@ Which one you are looking at tells you where to go. A `401` on the ACR webhook e
 | Webhook URL field is empty in the Deployment Center | Same place | SCM basic auth is disabled |
 | Webhook exists but never fires on push | ACR → the webhook's **Scope** field | The scope names a different repository or tag than the one you pushed |
 | The new version appeared, but only after you saved a setting | — | The save restarted the app; the webhook is not proven to work |
-| Platform logs show `ImagePullUnauthorizedFailure` | Managed identity → Azure role assignments | The identity does not hold `AcrPull` on the registry |
 | A variable you set is not visible to your code | Kudu → Environment → Settings & Variables | It was not saved, or was set on the wrong app |
 
-## 10. Sources
+## 9. Sources
 
 1. Microsoft Learn, *Kudu service overview* — [learn.microsoft.com/en-us/azure/app-service/resources-kudu](https://learn.microsoft.com/en-us/azure/app-service/resources-kudu)
 2. Red Hat, *What is a webhook?* — [redhat.com/en/topics/automation/what-is-a-webhook](https://www.redhat.com/en/topics/automation/what-is-a-webhook)
