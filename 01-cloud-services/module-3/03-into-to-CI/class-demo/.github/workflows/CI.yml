@@ -1,0 +1,17 @@
+# Name of the workflow
+name: CI
+
+# Trigger
+on:
+    push:
+        branches: [main]
+
+jobs:
+    # Our single job
+    say-hello:
+        # Configuring the runner
+        runs-on: ubuntu-latest
+        # Our simple step
+        steps:
+            - name: Say hello
+              run: echo "Hello world"

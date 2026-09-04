@@ -1,0 +1,18 @@
+{
+  "name": "express-ci-starter",
+  "version": "1.0.0",
+  "description": "A tiny Express app used to teach GitHub Actions CI",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "jest"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
