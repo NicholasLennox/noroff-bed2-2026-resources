@@ -6,7 +6,7 @@
 
 In [Automating a Deployment](../01-intro-to-automation/lecture.md) we removed the last human step from a deployment. A push to the container registry fires a webhook, the App Service's SCM sidecar receives it, the image is pulled, the container restarts. The [continuous deployment kata](../02-practical-cd-app-service/kata/) had you build that yourself.
 
-That machinery has one input: an image built from the code that is on `main`. Whatever is on `main` gets built, gets pushed, gets deployed. Nothing between you and production asks whether the code works.
+That process has one input: an image built from the code that is on `main`. Whatever is on `main` gets built, gets pushed, gets deployed. Nothing between you and production asks whether the code works.
 
 ![The recap of Azure CD on the left, and the shape of this lesson on the right](./boards/01-cicd-overview.jpeg)
 
@@ -43,7 +43,7 @@ A job is a list of **steps**, and a step does one of exactly two things:
 
 `actions/checkout` is the one you will use in every workflow you ever write. `docker/login-action`, `docker/build-push-action`, `azure/login` and `azure/webapp-deploy` are the ones this module is heading towards - each of them wrapping a command you have already run by hand.
 
-When you open the Actions tab on a repository with no workflows, GitHub offers a gallery of starter templates. They are worth reading later; we wrote the file by hand instead, because the point was to know what each line does. Two things make that less painful: install the **GitHub Actions** extension in VS Code, which validates the schema as you type, and remember that YAML takes indentation literally. A key nested two spaces too far is a different key.
+When you open the Actions tab on a repository with no workflows, GitHub offers a gallery of starter templates. They are worth reading later; we wrote the file by hand instead, because the point was to know what each line does. Two things make that less painful: install the **GitHub Actions** extension in VS Code, which validates the schema as you type, and remember that YAML takes indentation literally.
 
 ## 4. Stage 1 - make something run
 
@@ -91,7 +91,7 @@ Above it, in **Set up job**, is everything GitHub did before your step: it names
 
 A workflow that prints a greeting cannot tell you anything. To be a check, it has to be able to go red.
 
-The app in `class-demo/` is small enough to hold in your head. One endpoint, and two tests against it:
+The app in `class-demo/` is simple on purpose. One endpoint, and two tests against it:
 
 ```javascript
 app.get("/health", (req, res) => {
@@ -142,7 +142,7 @@ jobs:
               run: npm test
 ```
 
-The checkout step is the one that surprises people. The runner is a blank machine - GitHub does not put your code on it just because the workflow lives in your repository. Nothing is there until something fetches it, and `actions/checkout` is that something. This is also the first `uses:` in the file, so it is worth noticing the difference in shape: `run:` gets a command, `uses:` gets an owner, a repository, and a version tag.
+The runner is a blank machine - GitHub does not put your code on it just because the workflow lives in your repository. Nothing is there until something fetches it, and `actions/checkout` is that something. This is also the first `uses:` in the file, so it is worth noticing the difference in shape: `run:` gets a command, `uses:` gets an owner, a repository, and a version tag.
 
 Push a change, and:
 
@@ -150,13 +150,13 @@ Push a change, and:
 
 ### 5.1 Breaking it on purpose
 
-Now the interesting half. Change the second test to expect `'okay'` where the endpoint returns `'ok'`, confirm it fails locally, and push it to `main`.
+Change the second test to expect `'okay'` where the endpoint returns `'ok'`, confirm it fails locally, and push it to `main`.
 
 ![The run for "updated tests", failed, with annotations](./images/04-failing-tests.png)
 
 Red, in 15 seconds, without anyone being asked to look. The Summary page gives you the shape of the failure - which job, how long, and an **Annotations** panel pulling the important lines out of the log. Here the error annotation reads `Process completed with exit code 1`.
 
-That sentence is the whole mechanism. Jest exits with a non-zero status when a test fails. The runner treats a non-zero exit from a step as a failed step, a failed step fails the job, and a failed job fails the run. There is no clever integration between GitHub and Jest - GitHub is watching an exit code, exactly as your shell does.
+Jest exits with a non-zero status when a test fails. The runner treats a non-zero exit from a step as a failed step, a failed step fails the job, and a failed job fails the run. There is no clever integration between GitHub and Jest - GitHub is watching an exit code, exactly as your shell does.
 
 Expand the failing step to see why:
 
@@ -168,7 +168,7 @@ For failures that are less obvious than a two-letter typo, there is an **Explain
 
 ![Copilot explaining the failing job from its logs](./images/06-explaining-error.png)
 
-> A step fails when its command exits non-zero. Every gate in this lesson is built on that one fact.
+> A step fails when its command exits non-zero.
 
 ### 5.2 Which version of Node is this running on?
 
@@ -191,6 +191,8 @@ The fix is an action that installs the version you want before the tests run:
   with:
       node-version: 22
 ```
+
+> You can add this to your workflow job before the `npm ci` step.
 
 `with:` is how you pass configuration into an action - the equivalent of the flags you would give a command. Each action documents its own inputs; `node-version` is one of `setup-node`'s. See the [`with` syntax reference](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepswith).
 
