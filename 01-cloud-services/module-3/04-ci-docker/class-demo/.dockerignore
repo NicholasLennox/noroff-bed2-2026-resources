@@ -1,0 +1,8 @@
+node_modules
+npm-debug.log
+tests
+.git
+.github
+.vscode
+README.md
+project.md
