@@ -91,13 +91,15 @@ Above it, in **Set up job**, is everything GitHub did before your step: it names
 
 A workflow that prints a greeting cannot tell you anything. To be a check, it has to be able to go red.
 
-The app in `class-demo/` is simple on purpose. One endpoint, and two tests against it:
+The app in `class-demo/` is simple on purpose. One endpoint in `src/app.js`:
 
 ```javascript
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 ```
+
+And two tests against it in `tests/health.test.js`:
 
 ```javascript
 describe("GET /health", () => {
@@ -204,7 +206,7 @@ The broken code was on `main`. The pipeline ran, correctly, and told us - after 
 
 ## 7. Stage 3 - moving the gate to the pull request
 
-The change to the workflow is four lines:
+The change is four lines. In `.github/workflows/CI.yml`, replace the whole `on:` block with:
 
 ```yaml
 on:
@@ -275,7 +277,28 @@ That is one complete cycle of a feature, and it is the loop that development act
 
 > A check on `main` reports the damage. A check on a pull request prevents it.
 
-## 8. Command reference
+## 8. Nothing stopped us pushing to `main`
+
+Every step of that cycle was voluntary. We branched because we decided to branch. At any point we could have run `git checkout main`, made the edit there, and pushed it - and git, GitHub and the workflow would all have allowed it. Changing the trigger to `pull_request` changed *when the workflow runs*. It did not change *who is allowed to write to the branch*.
+
+So what section 7 built is a convention. The enforcement is a separate setting: a **branch protection rule** *[a rule attached to a branch that refuses pushes and merges which do not meet conditions you set]*. GitHub raises this itself once a repository has a branch worth protecting. The two conditions that matter for what we have built are **require a pull request before merging**, which turns off direct pushes to `main`, and **require status checks to pass**, which names our `test` job and greys out the merge button until it is green.
+
+With those on, a direct push to `main` is rejected and the merge button stays disabled until the check passes. Newer repositories can express the same thing as a **ruleset**, which does the same job with the ability to have several apply at once and to be switched off without being deleted. Both are documented:
+
+- [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
+- [About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
+
+### 8.1 Why the branch is usually left open at first
+
+Turning protection on at the start of a project makes the project harder to start, and the reason is visible in section 7. To change the workflow, the changed file has to be on the branch that runs it - which is why we pushed the `pull_request` trigger straight to `main`. There is no way to test a pipeline without pushing it somewhere GitHub will pick it up, and a broken workflow usually takes several attempts: a mistyped key, an action that needs an input you did not give it, a step that passes locally and fails on a blank runner.
+
+Doing all of that through a pull request each time, against a branch that requires a green check from the very pipeline you are trying to fix, is slow and occasionally circular. So the normal order is: leave `main` open, push directly, get the pipeline working, and turn protection on once it is worth protecting.
+
+That order is why DevOps work tends to start with the automation rather than the application. The pipeline is the thing that has to be messy for a while, and it is cheapest to be messy with it when there is no application on the branch yet and nothing a bad push could damage.
+
+> Protect the branch when the pipeline is finished, not when the repository is created.
+
+## 9. Command reference
 
 One feature, start to finish:
 
@@ -319,10 +342,12 @@ jobs:
               run: npm test
 ```
 
-## 9. Sources
+## 10. Sources
 
 1. GitHub Docs, *Understanding GitHub Actions* - [docs.github.com/en/actions/get-started/understand-github-actions](https://docs.github.com/en/actions/get-started/understand-github-actions)
 2. GitHub Docs, *GitHub-hosted runners* - [docs.github.com/en/actions/concepts/runners/github-hosted-runners](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners)
 3. GitHub Docs, *Variables reference - default environment variables* - [docs.github.com/en/actions/reference/workflows-and-actions/variables#default-environment-variables](https://docs.github.com/en/actions/reference/workflows-and-actions/variables#default-environment-variables)
 4. GitHub Docs, *Workflow syntax - `jobs.<job_id>.steps[*].with`* - [docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepswith](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepswith)
 5. GitHub Docs, *GitHub flow* - [docs.github.com/en/get-started/using-github/github-flow](https://docs.github.com/en/get-started/using-github/github-flow)
+6. GitHub Docs, *About protected branches* - [docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
+7. GitHub Docs, *About rulesets* - [docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
