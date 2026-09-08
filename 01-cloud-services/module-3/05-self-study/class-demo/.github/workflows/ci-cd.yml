@@ -1,0 +1,94 @@
+# Name of workflow
+name: CI/CD
+
+# Trigger
+on:
+    push:
+        branches: [main]
+
+# Workflow-level, so the build job and the deploy job cannot disagree about
+# which image they mean. Written out in lowercase (for Docker).
+env:
+  IMAGE: ghcr.io/nicholaslennox/cd-demo-api
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        # The tests assert the app reports the environment it was given, and
+        # .env never reaches the runner. Without this the app reports "default"
+        # and the test fails. Scoped to this job.
+        env:
+          ENVIRONMENT: test
+
+        steps:
+            # Jobs start on an empty machine, so the code has to be fetched
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            # Runners ship whatever Node version is current. Pin it to the one
+            # the Dockerfile uses, so we test on what we ship.
+            - name: Set up Node.js 22
+              uses: actions/setup-node@v4
+              with:
+                node-version: '22'
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm test
+
+    build-and-push:
+        # Only build an image out of code that passed
+        needs: test
+
+        # GITHUB_TOKEN is read-only by default, we need to write to our packages to add an image to our registry.
+        permissions:
+          packages: write
+
+        runs-on: ubuntu-latest
+
+        steps:
+            # Each job gets its own fresh runner, so we check out again
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Log in to GHCR
+              uses: docker/login-action@v4
+              with:
+                  registry: ghcr.io
+                  # Both values are provided by Actions on every run
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build and push
+              uses: docker/build-push-action@v7
+              with:
+                  # Build context: the repo root, where the Dockerfile lives
+                  context: .
+                  push: true
+                  # One build, two names: the SHA never moves, latest always does
+                  tags: |
+                    ${{ env.IMAGE }}:${{ github.sha }}
+                    ${{ env.IMAGE }}:latest
+
+    # Job added this lesson
+    deploy-app-service:
+      # There is nothing to deploy until the image is in the registry
+      needs: build-and-push
+
+      runs-on: ubuntu-latest
+
+      env:
+        APP_SERVICE_NAME: cd-demo-bed2
+
+      steps:
+        - name: Deploy Container to Azure Web App
+          uses: azure/webapps-deploy@v3
+          with:
+            app-name: ${{ env.APP_SERVICE_NAME }}
+            # Pass the publish profile
+            publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+            # Deploy our specific version instead of latest
+            images: '${{ env.IMAGE }}:${{ github.sha }}'
