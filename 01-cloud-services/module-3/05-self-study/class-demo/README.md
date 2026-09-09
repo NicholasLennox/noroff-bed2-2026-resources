@@ -7,12 +7,12 @@ environment, and `/health` reports it back.
 GET /health  ->  200  { "status": "ok", "environment": "development" }
 ```
 
-- `src/app.js` — the app, exported without listening so tests can import it
-- `src/server.js` — starts it on `PORT`, defaulting to 3000
-- `tests/health.test.js` — jest + supertest
-- `.env` — `ENVIRONMENT` and `PORT` for local runs
-- `Dockerfile` — same shape as module 1
-- `.github/workflows/ci-cd.yml` — test, then build and push to GHCR
+- `src/app.js` - the app, exported without listening so tests can import it
+- `src/server.js` - starts it on `PORT`, defaulting to 3000
+- `tests/health.test.js` - jest + supertest
+- `.env` - `ENVIRONMENT` and `PORT` for local runs
+- `Dockerfile` - same shape as module 1
+- `.github/workflows/ci-cd.yml` - test, then build and push to GHCR
 
 ## Running it locally
 
@@ -31,7 +31,7 @@ ENVIRONMENT=test npm test
 ```
 
 Run `npm test` on its own and the third test fails with `expected "test", received
-"development"` — the app is reporting what `.env` gave it. That is the same failure the
+"development"` - the app is reporting what `.env` gave it. That is the same failure the
 pipeline hits, for the same reason.
 
 ## Configuration, and where it comes from
@@ -44,7 +44,7 @@ there. What changes between one place and another is who put the value in:
 | Your machine, `npm start` | `.env`, loaded by `dotenv` |
 | Your machine, `npm test` | your shell, on the command line |
 | The runner, in CI | the `env:` block on the `test` job |
-| A container | whatever the platform passes in — `.env` is excluded by `.dockerignore` |
+| A container | whatever the platform passes in - `.env` is excluded by `.dockerignore` |
 
 That last row is the one the deployment depends on. `.env` is a local convenience and never
 travels: it is not in the image, so a container gets its configuration from the App Service
@@ -67,7 +67,7 @@ app settings instead.
 
 Delete those two lines and push to watch the test job fail on the runner.
 
-The rest of the file is the `build-and-push` job from lesson 4 — log in to GHCR with
+The rest of the file is the `build-and-push` job from lesson 4 - log in to GHCR with
 `GITHUB_TOKEN`, build, and push under two tags, the commit SHA and `latest`.
 
 Deployment is what this lesson adds.

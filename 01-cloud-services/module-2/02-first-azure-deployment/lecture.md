@@ -48,6 +48,24 @@ That is a precise description of what we have: one web API, in one container, th
 
 > Choose the service by what it is optimised for, not by what it can be made to do. Almost anything can serve an HTTP request; the question is how much you have to build around it before it does.
 
+### 3.4 The same choice on the other platforms
+
+The choice we just made was between Azure services. The other two platforms present it differently.
+
+| What it does | Azure | AWS | Google Cloud |
+|---|---|---|---|
+| Rent a virtual machine | [Virtual Machines](https://azure.microsoft.com/en-us/products/virtual-machines) | [EC2](https://aws.amazon.com/ec2/) | [Compute Engine](https://cloud.google.com/products/compute) |
+| Managed hosting for a container | [App Service](https://azure.microsoft.com/en-us/products/app-service) | [App Runner](https://aws.amazon.com/apprunner/) | [Cloud Run](https://cloud.google.com/run) |
+| Run one container, nothing else | [Container Instances](https://azure.microsoft.com/en-us/products/container-instances) | [ECS on Fargate](https://aws.amazon.com/fargate/) | [Cloud Run](https://cloud.google.com/run) |
+| Containers that scale to zero | [Container Apps](https://azure.microsoft.com/en-us/products/container-apps) | [ECS on Fargate](https://aws.amazon.com/ecs/) | [Cloud Run](https://cloud.google.com/run) |
+| Managed Kubernetes | [AKS](https://azure.microsoft.com/en-us/products/kubernetes-service) | [EKS](https://aws.amazon.com/eks/) | [GKE](https://cloud.google.com/kubernetes-engine) |
+
+Read the middle three rows down the Google column. Azure splits container hosting across several services with different amounts of machinery, and choosing between them was the whole of this section. Google collapses three of those into Cloud Run: give it an image, get an HTTPS URL. The decision we just made does not exist there. AWS sits in between, where App Runner is the closest thing to App Service but the platform's centre of gravity is ECS and Fargate, which expect more configuration than either.
+
+That is a difference in philosophy rather than in features. All three will serve an HTTP request; they disagree about how many decisions you make first.
+
+Microsoft and Google both publish full mapping tables between the three platforms - [AWS to Azure](https://learn.microsoft.com/en-us/azure/architecture/aws-professional/services), [Google Cloud to Azure](https://learn.microsoft.com/en-us/azure/architecture/gcp-professional/services), and [AWS and Azure to Google Cloud](https://cloud.google.com/docs/get-started/aws-azure-gcp-service-comparison). They are the fastest way to translate a service name you do not recognise.
+
 ## 4. How Azure is organised
 
 Before creating anything, it is worth knowing what the thing you are about to create sits inside, because that hierarchy is how Azure decides who pays and who is allowed.
@@ -206,3 +224,5 @@ And one thing that has quietly stopped being our problem: HTTPS. App Service ter
 6. Microsoft Learn, *Azure billing offers and Microsoft Entra tenants* - [learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-area/azure-billing-microsoft-entra-tenant](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-area/azure-billing-microsoft-entra-tenant)
 7. Microsoft Learn, *Azure regions overview* - [learn.microsoft.com/en-us/azure/reliability/regions-overview](https://learn.microsoft.com/en-us/azure/reliability/regions-overview)
 8. Docker Hub, `docker/getting-started` - [hub.docker.com/r/docker/getting-started](https://hub.docker.com/r/docker/getting-started)
+9. Microsoft Learn, *AWS to Azure services comparison* - [learn.microsoft.com/en-us/azure/architecture/aws-professional/services](https://learn.microsoft.com/en-us/azure/architecture/aws-professional/services)
+10. Google Cloud, *Compare AWS and Azure services to Google Cloud* - [cloud.google.com/docs/get-started/aws-azure-gcp-service-comparison](https://cloud.google.com/docs/get-started/aws-azure-gcp-service-comparison)

@@ -27,7 +27,7 @@ You do not need to produce a formal report. Read the cases, consider the questio
 
 Read:
 
-**InfoQ — Microsoft Claims Reduction in Cloud Cost from Migrating Internal Services to .NET 6**
+**InfoQ - Microsoft Claims Reduction in Cloud Cost from Migrating Internal Services to .NET 6**
 
 [Read the article](https://www.infoq.com/news/2022/10/microsoft-dotnet-6-reduces-cost)
 
@@ -44,7 +44,7 @@ Consider:
 
 Read:
 
-**Amazon Prime Video Technology Blog — Scaling up the Prime Video audio/video monitoring service and reducing costs by 90%**
+**Amazon Prime Video Technology Blog - Scaling up the Prime Video audio/video monitoring service and reducing costs by 90%**
 
 [Read the article](https://www.infoq.com/news/2023/05/prime-ec2-ecs-saves-costs)
 
@@ -63,7 +63,7 @@ Think about whether the best architecture depends on the technology itself, or o
 
 Read:
 
-**Fortune — Dropbox IPO cloud stock**
+**Fortune - Dropbox IPO cloud stock**
 
 [Read the article](https://fortune.com/2018/02/23/dropbox-ipo-cloud-stock)
 
@@ -83,7 +83,7 @@ Consider:
 
 If you have additional time, read:
 
-**Fortune — Microsoft Claims Another Cloud Win as Symantec Moves Onto Azure**
+**Fortune - Microsoft Claims Another Cloud Win as Symantec Moves Onto Azure**
 
 [Read the article](https://fortune.com/2017/10/16/microsoft-azure-cloud-symantec)
 

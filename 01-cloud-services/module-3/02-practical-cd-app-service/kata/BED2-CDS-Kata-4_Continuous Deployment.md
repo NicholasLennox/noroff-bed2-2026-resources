@@ -4,7 +4,7 @@
 
 We have manually deployed a container to an App Service a few times so far. This kata is about learning to automate the deployment process using Webhooks on Azures platform. 
 
-**Bring your own API.** Any Node API you have built — an API from a previous kata, something from class, or something of your own. It needs one thing only: at least one `GET` endpoint returning a response you can read in a browser. Its recommended to use something you wrote rather than the greeting API from class.
+**Bring your own API.** Any Node API you have built - an API from a previous kata, something from class, or something of your own. It needs one thing only: at least one `GET` endpoint returning a response you can read in a browser. Its recommended to use something you wrote rather than the greeting API from class.
 
 You can work from the following references:
 
@@ -97,5 +97,5 @@ This kata is split into 3 stages: the first is a fully manual deployment, the se
 - **Break it.** Turn SCM Basic Auth Publishing Credentials back **off**. Make another small change, rebuild, push, and read the webhook event log. What status comes back, and does the deployed app change? Now get it working again - and find out whether turning basic auth back on is enough on its own, or whether the webhook has to be rebuilt. Write down the sequence that actually worked.
 - The `202` came back in under a second. The new version took minutes. What did the `202` confirm, and what did it not confirm?
 - Your webhook's **Scope** names one repository and one tag. If you pushed the same image again as `:v2`, would it fire? Answer first, then push a `:v2` and check whether you were right.
-- Back in kata 3 you deployed `:alpha`, a fixed tag: the running app never changes unless you deploy something new on purpose. Here you chose `:latest`, which moves — every redeploy pulls whatever the newest build is. What does that cost you in stability?
+- Back in kata 3 you deployed `:alpha`, a fixed tag: the running app never changes unless you deploy something new on purpose. Here you chose `:latest`, which moves - every redeploy pulls whatever the newest build is. What does that cost you in stability?
 - The webhook URL has a username and password inside it. If you pasted that URL into a group chat, what could someone do with it, and what would you have to do to make it useless to them?

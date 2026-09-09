@@ -240,6 +240,23 @@ What is not on this form is the permission itself. For the pull to work, that id
 
 > The real payoff of keeping the registry and the runtime on one platform is not convenience. It is that the credential stops existing as something anyone has to hold.
 
+### 8.1 The same idea, three names
+
+Managed identity is an Azure product name. The idea is not Azure's, and all three platforms solve it the same way.
+
+| Idea | Azure | AWS | Google Cloud |
+|---|---|---|---|
+| The billing boundary | Subscription | Account | Project |
+| A folder for resources with a shared lifecycle | Resource group | *(no equivalent - tags, or a CloudFormation stack)* | *(the project, roughly)* |
+| The identity directory | Microsoft Entra ID | [IAM](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html) | [Cloud IAM](https://cloud.google.com/iam/docs/overview) |
+| An identity for a resource, with no password to store | [Managed identity](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview) | [IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) | [Service accounts](https://cloud.google.com/iam/docs/service-account-overview) |
+| Private container registry | [ACR](https://azure.microsoft.com/en-us/products/container-registry) | [ECR](https://aws.amazon.com/ecr/) | [Artifact Registry](https://cloud.google.com/artifact-registry) |
+| The command-line tool | `az` | `aws` | `gcloud` |
+
+The bottom half of that table is the section you just read, on two other platforms: AWS attaches an IAM role to a task so it can pull from ECR, Google attaches a service account to a service so it can pull from Artifact Registry. Three names, one idea - the platform is on both ends of the transaction, so it can hold the credential itself.
+
+The second row is the one that does not transfer. An AWS account and a Google Cloud project are closer to an Azure **subscription** than to a resource group. AWS has nothing with a shared delete like a resource group: you tag resources and delete by tag, or you create them through CloudFormation and delete the stack. "Deleting the resource group deletes everything in it" is an Azure convenience, not a cloud one.
+
 ## 9. A port we did not have to configure
 
 Yesterday's lesson said that App Service assumes a custom container listens on port 80, and that a container listening anywhere else needs a `WEBSITES_PORT` app setting. Our container listens on 3000. We expected to set it, did not, and the app worked anyway - so what happened?
@@ -304,3 +321,5 @@ docker push beddemo.azurecr.io/greeting-api   # -> ACR
 9. Microsoft Learn, *Configure a custom container for Azure App Service* - [learn.microsoft.com/en-us/azure/app-service/configure-custom-container](https://learn.microsoft.com/en-us/azure/app-service/configure-custom-container?pivots=container-linux)
 10. Microsoft Learn, *FAQ - Azure App Service on Linux* - [learn.microsoft.com/en-us/troubleshoot/azure/app-service/faqs-app-service-linux-new](https://learn.microsoft.com/en-us/troubleshoot/azure/app-service/faqs-app-service-linux-new)
 11. Azure App Service OSS blog, *What's the difference between PORT and WEBSITES_PORT* - [azureossd.github.io/2023/02/15/Whats-the-difference-between-PORT-and-WEBSITES_PORT](https://azureossd.github.io/2023/02/15/Whats-the-difference-between-PORT-and-WEBSITES_PORT/)
+12. AWS, *IAM roles* - [docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)
+13. Google Cloud, *Service accounts overview* - [cloud.google.com/iam/docs/service-account-overview](https://cloud.google.com/iam/docs/service-account-overview)

@@ -223,7 +223,7 @@ The rule underneath: pin the toolchain wherever a step uses the **runner's** too
 
 Lesson 1's webhook said **"something changed, look again"**. The App Service had been configured once with an image name, so it already knew what to fetch.
 
-The action says **"run this exact image"**. Nothing on the Azure side is watching a registry — the pipeline rewrites the App Service's image setting itself, on every deployment.
+The action says **"run this exact image"**. Nothing on the Azure side is watching a registry - the pipeline rewrites the App Service's image setting itself, on every deployment.
 
 ```
 Lesson 1        ACR ──"something changed"──▶ App Service ──pulls :latest
@@ -231,7 +231,7 @@ Lesson 1        ACR ──"something changed"──▶ App Service ──pulls :
 This lesson   Actions ──"run :<sha>"───────▶ App Service ──pulls :<sha>
 ```
 
-Both go through the SCM endpoint from lesson 1, and both end with the App Service pulling. The difference is what it was told — and that is why the credential is different too. A webhook only had to deliver a message. The action changes the app's configuration, which is more to be allowed to do.
+Both go through the SCM endpoint from lesson 1, and both end with the App Service pulling. The difference is what it was told - and that is why the credential is different too. A webhook only had to deliver a message. The action changes the app's configuration, which is more to be allowed to do.
 
 So there are four things to set up, in order:
 

@@ -102,7 +102,7 @@ describe('GET /health', () => {
 
 - Why do we create separate `app.js` and `server.js` files? Think of at least two reasons (hint: separation of concerns).
 - What benefit do we get from creating the `src` and `tests` folders? How would a project scale badly (more features, more files) without this structure?
-- There are two places in this project where we read external config (`process.env`) — `src/app.js` and `src/server.js`. Do we need to load `dotenv` in both? What does this tell you about how the `dotenv` package actually works?
+- There are two places in this project where we read external config (`process.env`) - `src/app.js` and `src/server.js`. Do we need to load `dotenv` in both? What does this tell you about how the `dotenv` package actually works?
 - Why assert the `environment` value is **not** `'default'`, instead of just checking the property exists? What would that weaker check miss?
 - Try renaming the `tests` folder to something else, then run your tests. Now rename `health.test.js` to `health.e2e.js` instead. What happens in each case, and what does that tell you about how Jest finds tests?
 - If you were to commit this project to Git, which files or folders would you want to `.gitignore`? Why those specifically?

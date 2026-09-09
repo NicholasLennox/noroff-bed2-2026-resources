@@ -10,9 +10,9 @@ A single endpoint:
 GET /health  ->  200  { "status": "ok" }
 ```
 
-- `src/app.js` — the Express app, exported without listening (so tests can import it)
-- `src/server.js` — starts the app on port 3000
-- `tests/health.test.js` — integration test with jest + supertest
+- `src/app.js` - the Express app, exported without listening (so tests can import it)
+- `src/server.js` - starts the app on port 3000
+- `tests/health.test.js` - integration test with jest + supertest
 
 ## Running it locally
 
@@ -24,10 +24,10 @@ npm test      # run the integration tests
 
 ## The lecture: building CI one stage at a time
 
-Each stage adds one concept to `.github/workflows/CI.yml`. Do not jump ahead — the
+Each stage adds one concept to `.github/workflows/CI.yml`. Do not jump ahead - the
 point is that students see each piece do its job before the next one appears.
 
-### Stage 1 — Make something run
+### Stage 1 - Make something run
 
 Trigger a workflow on every push to `main`. One job, one step, `echo "hello world"`.
 
@@ -37,13 +37,13 @@ and the job go green. Open the logs and find the `hello world` line.
 **Concepts:** a workflow is a file in the repo; an event triggers it; a runner is a fresh
 machine GitHub gives you; the logs are where you look when something goes wrong.
 
-### Stage 2 — Add a check that can fail
+### Stage 2 - Add a check that can fail
 
 Rename the job to `test`. Give it real steps:
 
-1. `actions/checkout` — the runner starts empty, you have to pull your code onto it
-2. `npm ci` — install dependencies
-3. `npm test` — run the suite
+1. `actions/checkout` - the runner starts empty, you have to pull your code onto it
+2. `npm ci` - install dependencies
+3. `npm test` - run the suite
 
 **What to see:** a green run first, then deliberately break a test, push, and watch the
 workflow go red.
@@ -51,7 +51,7 @@ workflow go red.
 **Concepts:** a step that exits non-zero fails the job; a failed job stops the ones that
 depend on it. This is the whole idea of CI - an automated gate.
 
-### Stage 3 — Move the gate to pull requests
+### Stage 3 - Move the gate to pull requests
 
 Now that a failing check means something, `main` is no longer safe to push to directly.
 Introduced **GitHub Flow**: branch, commit, open a PR, get it checked, merge.

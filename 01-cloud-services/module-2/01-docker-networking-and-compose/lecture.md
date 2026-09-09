@@ -442,6 +442,8 @@ Two things to be clear about, because Compose is easy to over-read:
 - It is **declarative**. The file describes the desired end state - these services, these images, these ports - and Compose works out what to create, recreate or leave alone. It is not a script of steps.
 - It is aimed at **local development, testing and CI**. It runs containers on a single machine. It is not what runs your application in production across a cluster; that is the job of orchestrators like Kubernetes or a managed cloud container service. Compose being local is not a limitation to work around - it is what makes it a good development tool.
 
+An **orchestrator** *[software that runs containers across a group of machines instead of one]* does continuously what you have been doing by hand: deciding which machine each container runs on, restarting one that dies, starting more of them when traffic rises, and replacing them one at a time during a deployment so the application stays up. **Kubernetes** is the one you will hear named most often, every cloud provider sells a managed version of it, and Azure Container Apps, which we meet later, is built on top of it. Nothing in this course needs one, since a single machine is not a cluster.
+
 The real change is that the file lives in the repository next to the code. The setup stops being something you remember and becomes something you clone.
 
 ### 6.2 The database service
@@ -594,6 +596,28 @@ The `/health` response now tells you exactly which of the three worlds you are i
 | `default` | Nothing loaded - no `.env`, no `-e`, no Compose configuration. Something is wrong |
 
 That is a small thing that pays for itself constantly. When you are switching between these modes several times an hour, one request tells you which one you are actually looking at.
+
+### 6.7 What happens to the data
+
+`docker compose down` removes the containers, and the database container's filesystem goes with it - every table and every row created during the session. Run `up` again and MySQL starts from an empty database. That has suited us so far, and the tests in 2.4 depend on it: each file starts from a known empty state.
+
+It is not what you want for anything real. The fix is a **volume** *[storage managed by Docker that exists independently of any container, so it survives the container being removed]*:
+
+```yaml
+services:
+  db:
+    image: mysql:8
+    # ... everything else as before
+    volumes:
+      - db-data:/var/lib/mysql   # named volume : the path MySQL writes to inside the container
+
+volumes:
+  db-data:                        # declares the volume; Docker creates it on first use
+```
+
+The path on the right is dictated by the image, since `/var/lib/mysql` is where MySQL stores its data files. The name on the left is ours. With this in place, `docker compose down` removes the containers and leaves the data, and `docker compose down -v` removes the volume too, which is how you start clean deliberately.
+
+> A container's filesystem dies with the container.
 
 ## 7. Command reference
 
