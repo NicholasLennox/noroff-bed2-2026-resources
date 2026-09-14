@@ -1,0 +1,3 @@
+[submodule "01/cloud-services/ca/starter"]
+	path = 01/cloud-services/ca/starter
+	url = https://github.com/NicholasLennox/bed2-cds-ca-starter-trail
