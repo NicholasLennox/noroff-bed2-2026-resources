@@ -77,27 +77,39 @@ Write the `FROM` and `JOIN`s first and run it with `SELECT *`. Look at the rows.
 `SELECT`, `WHERE`, `LIKE`, `ORDER BY`, `TOP`, `DISTINCT`, `IS NULL`. No joins.
 
 **1.1 Customers in Canada**
+
 Marketing want to email everyone we have in Canada. Give them first name, last name, city and email address.
+
 *8 rows.*
 
 **1.2 Countries we sell in**
+
 Which countries do we have customers in? Just the list of country names, each once, alphabetical.
+
 *24 rows.*
 
 **1.3 The longest tracks**
+
 The ten longest tracks in the catalogue, with their length in minutes to one decimal place. Longest first.
+
 *10 rows.* Track length is stored in `Milliseconds`, and there are 60,000 of those in a minute. Dividing an integer by `60000` throws the decimals away; dividing by `60000.0` keeps them. `CAST(... AS DECIMAL(5,1))` rounds the result to one decimal place.
 
 **1.4 Love songs**
+
 Every track whose name starts with "Love", with the composer. Sorted by track name.
+
 *27 rows.*
 
 **1.5 Big invoices this year**
+
 Every invoice from 2025 worth more than 10 dollars: invoice number, date, billing country and total. Most recent first.
+
 *12 rows.*
 
 **1.6 Business customers**
+
 Which customers have a company name on file? Name, company and country.
+
 *10 rows.*
 
 ## Category 2: Two tables
@@ -105,23 +117,33 @@ Which customers have a company name on file? Name, company and country.
 `JOIN`, `LEFT JOIN`, table aliases, and a `WHERE` on the joined table.
 
 **2.1 Live albums**
+
 Every album with "Live" somewhere in its title, with the name of the artist who made it. Sorted by artist, then title.
+
 *17 rows.*
 
 **2.2 Iron Maiden's albums**
+
 Just the titles of every album by Iron Maiden.
+
 *21 rows.*
 
 **2.3 Who looks after whom**
+
 Every customer with the name of their support rep. Customer name and country, then the rep's first and last name. Sort by rep surname, then customer surname.
+
 *59 rows.*
 
 **2.4 The bossa nova catalogue**
+
 Every bossa nova track: track name, genre and price. Sorted by track name.
+
 *15 rows.*
 
 **2.5 Artists with nothing in the catalogue**
+
 Which artists are in the database but have no albums at all? Names only, alphabetical.
+
 *71 rows.*
 
 ## Category 3: Counting and totalling
@@ -129,27 +151,39 @@ Which artists are in the database but have no albums at all? Names only, alphabe
 `GROUP BY` with `COUNT`, `SUM`, `AVG`, `MIN`, `MAX`. `HAVING`. `YEAR()`.
 
 **3.1 Customers per country**
+
 How many customers do we have in each country? Biggest first, and alphabetical within ties.
+
 *24 rows.*
 
 **3.2 The biggest albums**
+
 The ten albums with the most tracks: title and track count, most tracks first.
+
 *10 rows.*
 
 **3.3 Sales per year**
+
 For each year we have been trading: the number of invoices and the total revenue.
+
 *5 rows.*
 
 **3.4 Prolific artists**
+
 Which artists have five or more albums in the catalogue? Artist name and album count, most albums first.
+
 *7 rows.*
 
 **3.5 Track length by genre** - *hard*
+
 For each genre: how many tracks, and the average, shortest and longest length in minutes to one decimal place. Longest average first.
+
 *25 rows.* The minutes conversion is the same as in 1.3, applied to each aggregate. Get the four numbers in milliseconds first, then convert.
 
 **3.6 Customers per employee**
+
 For every employee - not just the sales staff - how many customers they are the support rep for. Name, job title and count, biggest first.
+
 *8 rows.*
 
 ## Category 4: Reports
@@ -157,27 +191,39 @@ For every employee - not just the sales staff - how many customers they are the 
 Three or more tables, with a `GROUP BY` on top.
 
 **4.1 Most popular genre**
+
 Which genre sells the most? For every genre, the number of tracks we have sold in it, best-selling first.
+
 *24 rows.*
 
 **4.2 Best customers**
+
 Our top ten customers by the total amount they have spent with us. Name, country and total.
+
 *10 rows.*
 
 **4.3 Best-earning artists**
+
 The ten artists whose tracks have made us the most money. Artist name and revenue.
+
 *10 rows.*
 
 **4.4 Sales by rep**
+
 For each sales rep: how many invoices their customers have generated, and the total revenue. Highest revenue first.
+
 *3 rows.*
 
 **4.5 The Grunge playlist**
+
 Every track on the playlist called "Grunge", with its artist and album. Sorted by artist then track.
+
 *15 rows.*
 
 **4.6 Sales by country**
+
 For each country: how many customers, how many invoices, and the total revenue. Highest revenue first.
+
 *24 rows.*
 
 ## Category 5: Stretch
@@ -185,23 +231,33 @@ For each country: how many customers, how many invoices, and the total revenue. 
 Nothing new in the syntax; the difficulty is in reading the request correctly.
 
 **5.1 The org chart**
+
 Every employee with the name of the person they report to. Include the one person who reports to nobody.
+
 *8 rows.*
 
 **5.2 Tracks per playlist**
+
 Every playlist and how many tracks are on it, including the empty ones. Sort by count, biggest first.
+
 *18 rows.*
 
 **5.3 Dead stock**
+
 How many tracks in the catalogue have never been sold? One number.
+
 *1 row.*
 
 **5.4 Genre trends**
+
 For Rock, Latin and Metal only: the revenue from each genre in each year. One row per year per genre, ordered by year and then by revenue within the year.
+
 *15 rows.*
 
 **5.5 The 45-dollar club**
+
 Every customer whose total spend is over 45 dollars: name, email, number of invoices, total spent. Highest first.
+
 *5 rows.*
 
 ## Reflection
