@@ -54,13 +54,20 @@ Every price is in `Track.UnitPrice` and `InvoiceLine.UnitPrice`. Every track len
 
 Before writing anything, answer four questions about the request:
 
-1. **Which tables?**  
+1. **Which tables?**
+
    Every noun in the request lives somewhere. "Customers in Canada" is `Customer`. "Albums by Iron Maiden" is `Album` and `Artist`.
-2. **One row per what?**  
+
+2. **One row per what?**
+
    A list of customers is one row per customer. A count of customers per country is one row per country. This decides whether there is a `GROUP BY`, and what goes in it.
-3. **Which columns?**  
+
+3. **Which columns?**
+
    The request usually names them. If it does not, pick the ones that make the row identifiable.
-4. **Filtered, grouped, sorted?**  
+
+4. **Filtered, grouped, sorted?**
+
    "In Canada" is a `WHERE`. "Per country" is a `GROUP BY`. "Biggest first" is an `ORDER BY ... DESC`. "Top 10" is a `TOP`.
 
 Write the `FROM` and `JOIN`s first and run it with `SELECT *`. Look at the rows. Then narrow the columns, then filter, then group, then sort. Run it after every change.
