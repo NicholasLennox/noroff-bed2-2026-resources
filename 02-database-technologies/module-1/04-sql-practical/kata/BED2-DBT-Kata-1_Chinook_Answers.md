@@ -734,3 +734,418 @@ ORDER BY TotalSpent DESC;
 | Ladislav | Kovács | ladislav_kovacs@apple.hu | 7 | 45.62 |
 
 4.2 with a `HAVING` instead of a `TOP`. "Total spend over 45" is a condition on a `SUM`, and a `SUM` only exists after grouping, so it goes in `HAVING` rather than `WHERE`. The difference from 4.2 is the question being asked: "the top ten" always returns ten rows however much they spent; "everyone over 45" returns however many qualify - five, this time. Which one the person asking actually wants is worth checking before you write either.
+
+## Category 6: Nested queries
+
+### 6.1 Above-average tracks
+
+```sql
+SELECT COUNT(TrackId) AS LongerThanAverage
+FROM Track
+WHERE Milliseconds > (SELECT AVG(Milliseconds) FROM Track);
+```
+
+| LongerThanAverage |
+|---|
+| 494 |
+
+The inner query returns one number, the average length of every track, and the `WHERE` compares each track against it. The average is 6.6 minutes, and only 494 of 3,503 tracks are above it: the handful of 40-minute TV episodes pull the average well above the typical song. Both queries read the same table, which is fine - the inner one runs to completion before the outer one starts filtering.
+
+### 6.2 Dead stock, again
+
+```sql
+SELECT COUNT(TrackId) AS TracksNeverSold
+FROM Track
+WHERE TrackId NOT IN (SELECT TrackId FROM InvoiceLine);
+```
+
+| TracksNeverSold |
+|---|
+| 1519 |
+
+The inner query is the list of every track ID that appears on an invoice line - with repeats, which `IN` does not care about. The outer query counts the tracks whose ID is not on that list. The `LEFT JOIN` version from 5.3 gets there by building every track-sale pair and then keeping the pairs with no sale; this version asks the question directly.
+
+### 6.3 Iron Maiden's customers
+
+```sql
+SELECT c.FirstName, c.LastName, c.Country
+FROM Customer AS c
+WHERE c.CustomerId IN (
+    SELECT i.CustomerId
+    FROM Invoice AS i
+    JOIN InvoiceLine AS il ON i.InvoiceId = il.InvoiceId
+    JOIN Track AS t ON il.TrackId = t.TrackId
+    JOIN Album AS al ON t.AlbumId = al.AlbumId
+    JOIN Artist AS ar ON al.ArtistId = ar.ArtistId
+    WHERE ar.Name = 'Iron Maiden'
+)
+ORDER BY c.LastName;
+```
+
+| FirstName | LastName | Country |
+|---|---|---|
+| Camille | Bernard | France |
+| Edward | Francis | Canada |
+| Tim | Goyer | USA |
+| Patrick | Gray | USA |
+| Astrid | Gruber | Austria |
+| Frank | Harris | USA |
+| Phil | Hughes | United Kingdom |
+| Joakim | Johansson | Sweden |
+| Emma | Jones | United Kingdom |
+| Ladislav | Kovács | Hungary |
+
+*27 rows.*
+
+The inner query is the 4.3 chain run in the other direction - from artist down to invoice - returning one `CustomerId` per Iron Maiden track sold, 140 rows with plenty of repeats. The outer query only asks whether each customer's ID is somewhere on that list, so the repeats do not matter and "each customer once" comes for free. The alternative, joining `Customer` onto the same chain, produces one row per sale and needs a `DISTINCT` to collapse them.
+
+### 6.4 The average customer
+
+```sql
+SELECT CAST(AVG(s.TotalSpent) AS DECIMAL(10,2)) AS AvgSpend
+FROM (
+    SELECT CustomerId, SUM(Total) AS TotalSpent
+    FROM Invoice
+    GROUP BY CustomerId
+) AS s;
+```
+
+| AvgSpend |
+|---|
+| 39.47 |
+
+An aggregate of an aggregate. The derived table `s` is the 59-row summary - one row per customer with their total - and the outer query averages the `TotalSpent` column of it. `AVG(Total)` straight from `Invoice` gives 5.65, which is the average *invoice*, and there are seven invoices per customer. The `CAST` only rounds the answer; the raw value is 39.467796.
+
+### 6.5 Above-average customers
+
+```sql
+SELECT c.FirstName, c.LastName, c.Country, SUM(i.Total) AS TotalSpent
+FROM Customer AS c
+JOIN Invoice AS i ON c.CustomerId = i.CustomerId
+GROUP BY c.FirstName, c.LastName, c.Country
+HAVING SUM(i.Total) > (
+    SELECT AVG(TotalSpent)
+    FROM (
+        SELECT CustomerId, SUM(Total) AS TotalSpent
+        FROM Invoice
+        GROUP BY CustomerId
+    ) AS s
+)
+ORDER BY TotalSpent DESC;
+```
+
+| FirstName | LastName | Country | TotalSpent |
+|---|---|---|---|
+| Helena | Holý | Czech Republic | 49.62 |
+| Richard | Cunningham | USA | 47.62 |
+| Luis | Rojas | Chile | 46.62 |
+| Hugh | O'Reilly | Ireland | 45.62 |
+| Ladislav | Kovács | Hungary | 45.62 |
+| Julia | Barnett | USA | 43.62 |
+| Frank | Ralston | USA | 43.62 |
+| Fynn | Zimmermann | Germany | 43.62 |
+| Astrid | Gruber | Austria | 42.62 |
+| Victor | Stevens | USA | 42.62 |
+
+*22 rows.*
+
+5.5 with the `45` replaced by the whole of 6.4, uncast. `HAVING` compares each customer's `SUM` against a subquery that returns one value, exactly as a `WHERE` would. The subquery is nested two deep - a derived table inside a scalar subquery - and it is still just 6.4 pasted into brackets. Twenty-two customers are above the 39.47 average and thirty-seven are below it.
+
+## Category 7: Views
+
+### 7.1 CustomerSpend
+
+```sql
+GO
+CREATE VIEW CustomerSpend AS
+SELECT c.CustomerId, c.FirstName, c.LastName, c.Country, c.Email,
+       COUNT(i.InvoiceId) AS Invoices, SUM(i.Total) AS TotalSpent
+FROM Customer AS c
+JOIN Invoice AS i ON c.CustomerId = i.CustomerId
+GROUP BY c.CustomerId, c.FirstName, c.LastName, c.Country, c.Email;
+GO
+
+SELECT COUNT(*) FROM CustomerSpend;
+```
+
+| (No column name) |
+|---|
+| 59 |
+
+The query is 5.5 without its `HAVING` and `ORDER BY`, with the ID and country added so later reports have them. `CustomerId` is in the `GROUP BY` for the reason 5.2 gave: it is what makes a customer a customer. Every column the view exposes has a name - the two aggregates are aliased, because `CREATE VIEW` refuses a column it cannot name. The `GO` before `CREATE VIEW` ends the previous batch; without it the server says `'CREATE VIEW' must be the first statement in a query batch`.
+
+### 7.2 The 45-dollar club, again
+
+```sql
+SELECT FirstName, LastName, Email, Invoices, TotalSpent
+FROM CustomerSpend
+WHERE TotalSpent > 45
+ORDER BY TotalSpent DESC;
+```
+
+| FirstName | LastName | Email | Invoices | TotalSpent |
+|---|---|---|---|---|
+| Helena | Holý | hholy@gmail.com | 7 | 49.62 |
+| Richard | Cunningham | ricunningham@hotmail.com | 7 | 47.62 |
+| Luis | Rojas | luisrojas@yahoo.cl | 7 | 46.62 |
+| Ladislav | Kovács | ladislav_kovacs@apple.hu | 7 | 45.62 |
+| Hugh | O'Reilly | hughoreilly@apple.ie | 7 | 45.62 |
+
+The same five rows as 5.5. The `HAVING` has become a `WHERE`, because to the outer query `TotalSpent` is a column on a table, not an aggregate - the grouping already happened inside the view. The two 45.62 customers may swap places between this and 5.5; they tie, and nothing in the `ORDER BY` decides between them.
+
+### 7.3 Above-average customers, again
+
+```sql
+SELECT FirstName, LastName, Country, TotalSpent
+FROM CustomerSpend
+WHERE TotalSpent > (SELECT AVG(TotalSpent) FROM CustomerSpend)
+ORDER BY TotalSpent DESC;
+```
+
+| FirstName | LastName | Country | TotalSpent |
+|---|---|---|---|
+| Helena | Holý | Czech Republic | 49.62 |
+| Richard | Cunningham | USA | 47.62 |
+| Luis | Rojas | Chile | 46.62 |
+| Ladislav | Kovács | Hungary | 45.62 |
+| Hugh | O'Reilly | Ireland | 45.62 |
+| Fynn | Zimmermann | Germany | 43.62 |
+| Julia | Barnett | USA | 43.62 |
+| Frank | Ralston | USA | 43.62 |
+| Victor | Stevens | USA | 42.62 |
+| Astrid | Gruber | Austria | 42.62 |
+
+*22 rows.*
+
+6.5 was fourteen lines and nested two deep. The view is used twice here, once for the list and once for the average, and each use is a plain `SELECT` because the per-customer grouping lives in the view. The derived table that 6.5 had to spell out inside the `HAVING` is now `CustomerSpend`.
+
+### 7.4 TrackCatalogue
+
+```sql
+GO
+CREATE VIEW TrackCatalogue AS
+SELECT t.TrackId, t.Name AS Track, al.Title AS Album, ar.Name AS Artist,
+       g.Name AS Genre, m.Name AS MediaType,
+       CAST(t.Milliseconds / 60000.0 AS DECIMAL(5,1)) AS Minutes, t.UnitPrice
+FROM Track AS t
+JOIN Album AS al ON t.AlbumId = al.AlbumId
+JOIN Artist AS ar ON al.ArtistId = ar.ArtistId
+JOIN Genre AS g ON t.GenreId = g.GenreId
+JOIN MediaType AS m ON t.MediaTypeId = m.MediaTypeId;
+GO
+
+SELECT TOP (5) * FROM TrackCatalogue ORDER BY TrackId;
+```
+
+| TrackId | Track | Album | Artist | Genre | MediaType | Minutes | UnitPrice |
+|---|---|---|---|---|---|---|---|
+| 1 | For Those About To Rock (We Salute You) | For Those About To Rock We Salute You | AC/DC | Rock | MPEG audio file | 5.7 | .99 |
+| 2 | Balls to the Wall | Balls to the Wall | Accept | Rock | Protected AAC audio file | 5.7 | .99 |
+| 3 | Fast As a Shark | Restless and Wild | Accept | Rock | Protected AAC audio file | 3.8 | .99 |
+| 4 | Restless and Wild | Restless and Wild | Accept | Rock | Protected AAC audio file | 4.2 | .99 |
+| 5 | Princess of the Dawn | Restless and Wild | Accept | Rock | Protected AAC audio file | 6.3 | .99 |
+
+*3503 rows.*
+
+Every lookup that hangs off `Track` - album, artist, genre, media type - joined in once and flattened to one wide row per track. Three of the source tables have a column called `Name`, so every one of them is aliased to say whose name it is; `t.Name AS Track` and `ar.Name AS Artist` are not decoration here, the view will not save without them. The row count is 3,503, the same as `Track`, because every track has an album, genre and media type - four inner joins and nothing lost.
+
+### 7.5 Best-earning artists, again
+
+```sql
+SELECT TOP (10) tc.Artist, SUM(il.UnitPrice * il.Quantity) AS Revenue
+FROM InvoiceLine AS il
+JOIN TrackCatalogue AS tc ON il.TrackId = tc.TrackId
+GROUP BY tc.Artist
+ORDER BY Revenue DESC;
+```
+
+| Artist | Revenue |
+|---|---|
+| Iron Maiden | 138.60 |
+| U2 | 105.93 |
+| Metallica | 90.09 |
+| Led Zeppelin | 86.13 |
+| Lost | 81.59 |
+| The Office | 49.75 |
+| Os Paralamas Do Sucesso | 44.55 |
+| Deep Purple | 43.56 |
+| Faith No More | 41.58 |
+| Eric Clapton | 39.60 |
+
+The same ten rows as 4.3, and the three-hop chain from `Track` to `Artist` has become one `JOIN` onto the view. `TrackCatalogue` keeps `TrackId`, which is what makes the join possible - a view that only exposed names would have nothing for `InvoiceLine` to match on. When the server runs this it expands the view back into its four joins, so the work is the same as 4.3; only the writing is shorter.
+
+### 7.6 The Grunge playlist, again
+
+```sql
+SELECT tc.Track, tc.Artist, tc.Album
+FROM Playlist AS p
+JOIN PlaylistTrack AS pt ON p.PlaylistId = pt.PlaylistId
+JOIN TrackCatalogue AS tc ON pt.TrackId = tc.TrackId
+WHERE p.Name = 'Grunge'
+ORDER BY tc.Artist, tc.Track;
+```
+
+| Track | Artist | Album |
+|---|---|---|
+| Man In The Box | Alice In Chains | Facelift |
+| Come As You Are | Nirvana | Nevermind |
+| Drain You | Nirvana | Nevermind |
+| In Bloom | Nirvana | Nevermind |
+| Lithium | Nirvana | Nevermind |
+| On A Plain | Nirvana | Nevermind |
+| Smells Like Teen Spirit | Nirvana | Nevermind |
+| Alive | Pearl Jam | Ten |
+| Daughter | Pearl Jam | Vs. |
+| Evenflow | Pearl Jam | Ten |
+
+*15 rows.*
+
+4.5 had five tables; this has two tables and a view. The playlist side has not changed - `Playlist` to `PlaylistTrack` is still the junction table hop - and everything from `Track` onwards is the view. A view can sit on either side of a `JOIN`, be filtered in a `WHERE`, and be sorted on, and the outer query cannot tell it from a table.
+
+## Category 8: Stored procedures
+
+### 8.1 AlbumsByArtist
+
+```sql
+GO
+CREATE PROCEDURE AlbumsByArtist
+    @ArtistName NVARCHAR(120)
+AS
+BEGIN
+    SELECT al.Title
+    FROM Album AS al
+    JOIN Artist AS ar ON al.ArtistId = ar.ArtistId
+    WHERE ar.Name = @ArtistName
+    ORDER BY al.Title;
+END
+GO
+
+EXEC AlbumsByArtist @ArtistName = 'Iron Maiden';
+```
+
+| Title |
+|---|
+| A Matter of Life and Death |
+| A Real Dead One |
+| A Real Live One |
+| Brave New World |
+| Dance Of Death |
+| Fear Of The Dark |
+| Iron Maiden |
+| Killers |
+| Live After Death |
+| Live At Donington 1992 (Disc 1) |
+
+*21 rows.*
+
+2.2 with `'Iron Maiden'` replaced by `@ArtistName`. The parameter's type is `NVARCHAR(120)` because that is the type of `Artist.Name` - the parameter should hold whatever the column can hold. `ORDER BY` is allowed inside a procedure, unlike a view, because a procedure returns a result and a result has an order. `EXEC AlbumsByArtist 'Led Zeppelin'` returns 14 rows through the same saved query; `EXEC AlbumsByArtist 'Nobody'` returns none, which is not an error.
+
+### 8.2 TopCustomers
+
+```sql
+GO
+CREATE PROCEDURE TopCustomers
+    @Count INT
+AS
+BEGIN
+    SELECT TOP (@Count) FirstName, LastName, Country, TotalSpent
+    FROM CustomerSpend
+    ORDER BY TotalSpent DESC;
+END
+GO
+
+EXEC TopCustomers @Count = 5;
+```
+
+| FirstName | LastName | Country | TotalSpent |
+|---|---|---|---|
+| Helena | Holý | Czech Republic | 49.62 |
+| Richard | Cunningham | USA | 47.62 |
+| Luis | Rojas | Chile | 46.62 |
+| Ladislav | Kovács | Hungary | 45.62 |
+| Hugh | O'Reilly | Ireland | 45.62 |
+
+4.2 with the ten as a parameter, and the grouping delegated to the view. A procedure can read a view exactly as a query can, so the two build on each other: the view holds the shape of the data, the procedure holds the question and its inputs. `TOP` takes its parameter in brackets; `TOP @Count` without them is a syntax error.
+
+### 8.3 CustomersInCountry
+
+```sql
+GO
+CREATE PROCEDURE CustomersInCountry
+    @Country NVARCHAR(40)
+AS
+BEGIN
+    SELECT FirstName, LastName, Email, Invoices, TotalSpent
+    FROM CustomerSpend
+    WHERE Country = @Country
+    ORDER BY TotalSpent DESC, LastName;
+END
+GO
+
+EXEC CustomersInCountry @Country = 'Canada';
+```
+
+| FirstName | LastName | Email | Invoices | TotalSpent |
+|---|---|---|---|---|
+| François | Tremblay | ftremblay@gmail.com | 7 | 39.62 |
+| Jennifer | Peterson | jenniferp@rogers.ca | 7 | 38.62 |
+| Robert | Brown | robbrown@shaw.ca | 7 | 37.62 |
+| Edward | Francis | edfrancis@yachoo.ca | 7 | 37.62 |
+| Aaron | Mitchell | aaronmitchell@yahoo.ca | 7 | 37.62 |
+| Mark | Philips | mphilips12@shaw.ca | 7 | 37.62 |
+| Martha | Silk | marthasilk@gmail.com | 7 | 37.62 |
+| Ellie | Sullivan | ellie.sullivan@shaw.ca | 7 | 37.62 |
+
+The same eight people as 1.1, with the spend columns the view adds. `NVARCHAR(40)` matches `Customer.Country`. The second sort key is there because six of the eight tie on 37.62, and without it their order would be whatever the server happened to produce.
+
+### 8.4 RevenueBetween
+
+```sql
+GO
+CREATE PROCEDURE RevenueBetween
+    @From DATE,
+    @To DATE
+AS
+BEGIN
+    SELECT COUNT(InvoiceId) AS Invoices, SUM(Total) AS Revenue
+    FROM Invoice
+    WHERE InvoiceDate >= @From AND InvoiceDate <= @To;
+END
+GO
+
+EXEC RevenueBetween @From = '2025-01-01', @To = '2025-06-30';
+```
+
+| Invoices | Revenue |
+|---|---|
+| 38 | 211.86 |
+
+Two parameters, separated by a comma, each with its own type. `DATE` is right because the comparison is against `InvoiceDate`; the string `'2025-01-01'` is converted to a date on the way in, as it was in 1.5. `EXEC RevenueBetween '2025-01-01', '2025-12-31'` gives 80 invoices and 450.58, which is the 2025 row of 3.3 - the same numbers by a different route.
+
+### 8.5 GenreRevenue
+
+```sql
+GO
+CREATE PROCEDURE GenreRevenue
+    @GenreName NVARCHAR(120),
+    @Year INT
+AS
+BEGIN
+    SELECT g.Name AS Genre, YEAR(i.InvoiceDate) AS [Year], SUM(il.UnitPrice * il.Quantity) AS Revenue
+    FROM Invoice AS i
+    JOIN InvoiceLine AS il ON i.InvoiceId = il.InvoiceId
+    JOIN Track AS t ON il.TrackId = t.TrackId
+    JOIN Genre AS g ON t.GenreId = g.GenreId
+    WHERE g.Name = @GenreName AND YEAR(i.InvoiceDate) = @Year
+    GROUP BY g.Name, YEAR(i.InvoiceDate);
+END
+GO
+
+EXEC GenreRevenue @GenreName = 'Metal', @Year = 2024;
+```
+
+| Genre | Year | Revenue |
+|---|---|---|
+| Metal | 2024 | 65.34 |
+
+5.4 with both of its filters turned into parameters. 5.4 answered "Rock, Latin and Metal, every year" in one fifteen-row result; this answers one cell of that table per call, and the Metal 2024 cell matches. A procedure is the right shape when the caller knows which cell they want; the report is the right shape when they want the whole table. `EXEC GenreRevenue 'Opera', 2024` returns no rows - Opera has never sold - and, as with 8.1, an empty result is not an error.
