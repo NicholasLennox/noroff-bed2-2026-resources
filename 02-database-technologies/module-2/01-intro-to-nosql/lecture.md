@@ -2,6 +2,17 @@
 
 > This lesson introduces NoSQL, and in particular the document model, off the back of the SQL you worked with last week. New terms get a plain-English version in brackets.
 
+**By the end of this lesson you should be able to:**
+
+1. **Describe** the document model using its own vocabulary - collection, document, field, `_id`, embedded data and reference.
+2. **Contrast** the relationship-first approach of SQL with the access-pattern-first approach of the document model.
+3. **Discuss** the role of duplication in a document database.
+4. **Decide**, for a given access pattern and cardinality, whether related data should be embedded or referenced.
+5. **Explain** the consequences of a document database not enforcing referential integrity.
+6. **Explain** how a flexible schema leads to schema drift.
+7. **Distinguish** between structured, semi-structured and unstructured data.
+8. **Discuss** the kind of work a key-value store such as Redis is suited to.
+
 ## 1. Where we are in the course
 
 This subject runs over three modules, and each one is a different way of storing or splitting up data.
