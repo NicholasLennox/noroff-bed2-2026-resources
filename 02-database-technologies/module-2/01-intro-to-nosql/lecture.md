@@ -13,6 +13,23 @@
 7. **Distinguish** between structured, semi-structured and unstructured data.
 8. **Discuss** the kind of work a key-value store such as Redis is suited to.
 
+## Contents
+
+1. [Where we are in the course](#1-where-we-are-in-the-course)
+2. [What SQL is built for](#2-what-sql-is-built-for)
+3. [A different starting question](#3-a-different-starting-question)
+   - [3.1 A movie as a document](#31-a-movie-as-a-document)
+   - [3.2 Why `_id` is not a number](#32-why-_id-is-not-a-number)
+   - [3.3 Duplication is expected](#33-duplication-is-expected)
+4. [Embedding or referencing](#4-embedding-or-referencing)
+5. [The same ideas under different names](#5-the-same-ideas-under-different-names)
+   - [5.1 Flexible schemas, and where the rules go](#51-flexible-schemas-and-where-the-rules-go)
+   - [5.2 When does a project actually move to NoSQL?](#52-when-does-a-project-actually-move-to-nosql)
+6. [What each one costs](#6-what-each-one-costs)
+7. [Three kinds of data](#7-three-kinds-of-data)
+8. [The other families](#8-the-other-families)
+9. [Sources](#9-sources)
+
 ## 1. Where we are in the course
 
 This subject runs over three modules, and each one is a different way of storing or splitting up data.
@@ -24,6 +41,8 @@ This subject runs over three modules, and each one is a different way of storing
 3. **Distributed computing** - next week, focused on microservices, and the last module before the assignment.
 
 The bottom of the board is a sketch of example ssytems that can be build with what we are learning, but its not important for now. 
+
+[Back to contents](#contents)
 
 ## 2. What SQL is built for
 
@@ -48,6 +67,8 @@ For any of those answers to be worth having, the data has to be trustworthy, and
 None of that is free. Shaping data into a relational state is work you do up front, before you store anything, and the payoff comes later when you query it. That is a good trade when relationships are the point. It is a worse trade when they are not.
 
 > SQL is good at asking complicated questions about structured relationships.
+
+[Back to contents](#contents)
 
 ## 3. A different starting question
 
@@ -105,6 +126,8 @@ Besides storage, this approach has real consequences. For examples, there is no 
 
 > Relational databases de-duplicate so that writes are safe; document databases duplicate so that reads are cheap.
 
+[Back to contents](#contents)
+
 ## 4. Embedding or referencing
 
 Embedding is not the only option. A document can hold a value that identifies another document, which gives you something that looks like a relationship back.
@@ -133,6 +156,8 @@ In the relational model, referential integrity was a guarantee the database made
 That is a question about **consistency** *[whether every part of the system agrees about what the data currently is]*.
 
 > A reference in a document is a convention, not a constraint.
+
+[Back to contents](#contents)
 
 ## 5. The same ideas under different names
 
@@ -174,6 +199,8 @@ It comes with **scale** and it comes with **distribution**. While the whole appl
 
 Which is why the solution is usually a combination of both appraoches. Parts of a system where relationships and correctness dominate stay relational. Parts that are read constantly in a fixed shape move to documents. From that, your system can grow to accomodate scaling and add in new features are independent services.
 
+[Back to contents](#contents)
+
 ## 6. What each one costs
 
 | | Relational | Document |
@@ -184,6 +211,8 @@ Which is why the solution is usually a combination of both appraoches. Parts of 
 A relational schema is designed around the data, so a question nobody anticipated is usually still answerable with a new query. A document schema is designed around the questions, so a question nobody anticipated can mean reshaping documents you have millions of.
 
 This flexibility is also what gets document databases chosen for the wrong reason. You do not have to design a structure before you can store anything, so if you need a front end showing some data, all you need is the data and the shape of it. That is a real advantage, and it is also how projects end up with all the validation logic they avoided writing in the schema written three times over in the application instead.
+
+[Back to contents](#contents)
 
 ## 7. Three kinds of data
 
@@ -202,6 +231,8 @@ Documents sit in the middle of a broader picture.
 This is where documents live, and where MongoDB sits.
 
 **Unstructured** data is video, audio, images, free-form text - things with no field names at all, or so little structure that querying them the way you query a table is not possible. It arrives in large volumes, gets dumped somewhere cheap, and is read by analytical tools that crawl it looking for patterns rather than by queries that ask precise questions. We are not working with unstructured data in this module.
+
+[Back to contents](#contents)
 
 ## 8. The other families
 
@@ -226,6 +257,8 @@ The same shape shows up without any cache at all. If your database is **replicat
 
 The remaining two families, **wide-column** and **graph**, plus CAP theorem, ACID against BASE, and where eventual consistency comes from, are for later lessons.
 
+[Back to contents](#contents)
+
 ## 9. Sources
 
 1. MongoDB, *Documents* - [mongodb.com/docs](https://www.mongodb.com/docs/manual/core/document/)
@@ -234,3 +267,5 @@ The remaining two families, **wide-column** and **graph**, plus CAP theorem, ACI
 4. MongoDB, *Schema Validation* - [mongodb.com/docs](https://www.mongodb.com/docs/manual/core/schema-validation/)
 5. MongoDB, *Sharding* - [mongodb.com/docs](https://www.mongodb.com/docs/manual/sharding/)
 6. Redis, *Develop with Redis* - [redis.io/docs](https://redis.io/docs/latest/develop/)
+
+[Back to contents](#contents)
