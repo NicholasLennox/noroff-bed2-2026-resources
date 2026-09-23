@@ -12,6 +12,8 @@
 6. **Explain** how a flexible schema leads to schema drift.
 7. **Distinguish** between structured, semi-structured and unstructured data.
 8. **Discuss** the kind of work a key-value store such as Redis is suited to.
+9. **Describe** the workload a wide-column store is built for.
+10. **Explain** why a graph database makes following relationships cheap.
 
 ## Contents
 
@@ -28,7 +30,13 @@
 6. [What each one costs](#6-what-each-one-costs)
 7. [Three kinds of data](#7-three-kinds-of-data)
 8. [The other families](#8-the-other-families)
-9. [Sources](#9-sources)
+9. [Self study: wide-column stores](#9-self-study-wide-column-stores)
+   - [9.1 What it is built for](#91-what-it-is-built-for)
+   - [9.2 Wide-column is not the same as columnar](#92-wide-column-is-not-the-same-as-columnar)
+10. [Self study: graph databases](#10-self-study-graph-databases)
+    - [10.1 Why the relationship is stored, not computed](#101-why-the-relationship-is-stored-not-computed)
+    - [10.2 Querying one](#102-querying-one)
+11. [Sources](#11-sources)
 
 ## 1. Where we are in the course
 
@@ -255,11 +263,88 @@ That is **cache invalidation**, and it is one of the genuinely hard problems in 
 
 The same shape shows up without any cache at all. If your database is **replicated** *[the same data kept on several machines so reads can be spread across them]*, a purchase written to one replica takes time to reach the others. Get routed to a different replica in that window and your purchase appears to be missing. It is not missing, it just has not arrived yet, and no amount of engineering removes the delay entirely - it can only be made small. Living with that deliberately is called **eventual consistency**.
 
-The remaining two families, **wide-column** and **graph**, plus CAP theorem, ACID against BASE, and where eventual consistency comes from, are for later lessons.
+The remaining two families, **wide-column** and **graph**, are sections 9 and 10 below, and those two are yours to read. CAP theorem, ACID against BASE, and where eventual consistency comes from are for later lessons.
 
 [Back to contents](#contents)
 
-## 9. Sources
+## 9. Self study: wide-column stores
+
+A **wide-column store** keeps its data in rows identified by a **row key** *[the single value you look a row up by, much like a primary key]*, and that is roughly where the resemblance to a table stops. Two rows in the same table do not have to hold the same columns, and one row can hold an enormous number of them.
+
+```
+sensor-114 | 09:00 -> 14.2 | 09:01 -> 14.3 | 09:02 -> 14.3 | ... (525,597 more)
+sensor-115 | 09:00 -> 11.8 | 09:01 -> 11.9 | 09:02 -> 12.0 | ...
+```
+
+Each reading is a column, not a row. A year of minute-by-minute readings from one sensor is one row with over half a million columns in it, and the column names are the timestamps.
+
+Columns are grouped into a **column family** *[a named group of columns that is stored together on disk]*, and the grouping is the point. A query that wants three columns out of two hundred reads the part of the disk holding those three, and never touches the rest.
+
+### 9.1 What it is built for
+
+These are built for a very large volume of writes, spread across a lot of machines, where the reads are narrow and predictable. Sensor readings, event logs, message histories - anything that arrives continuously and gets read back by key and by time range.
+
+The design question is the one documents asked, in a different accent. You do not model the entities and then work out the queries. You write down the query that has to be fast, and build the table around it. In **Apache Cassandra** the row key doubles as the **partition key** *[the value that decides which machine a row lives on]*, so "which machine answers this query" is settled by how you chose the key, before any data exists. Choose it badly and the query you cared about has to visit every machine in the cluster.
+
+Duplication turns up here for the same reason it did with documents. If two different queries need the same data, you write it twice, into two tables shaped for the two questions.
+
+**Cassandra** came out of Facebook and is now an Apache project. **Google Bigtable** is the original of this design, and **Apache HBase** is the open-source implementation of the paper Google published describing it.
+
+> A wide-column table is designed around the query that has to be fast, not around the entities.
+
+### 9.2 Wide-column is not the same as columnar
+
+These get called columnar databases, and there is a separate family the word fits better. A **column-oriented** database stores each column of a table contiguously, so "average salary across forty million rows" reads one column and ignores the other thirty. Those are analytics engines, built for scanning rather than for the key-and-range lookups above. The two families overlap in how they arrange bytes on disk and not in much else, so when you see the word columnar it is worth working out which one is meant.
+
+**Consider:**
+
+1. The sensor row above gains a column every minute and never loses one. What was the equivalent problem in the document model, and what did we do about it there?
+2. Writing the same reading into two tables to answer two questions costs you something the relational version was not paying. What?
+
+[Back to contents](#contents)
+
+## 10. Self study: graph databases
+
+You have drawn one of these already. In the first module we covered the **network model** - nodes, edges, direction and weights, and the many-to-many relationships a tree could not express. A **graph database** is that model turned into something you can query.
+
+The vocabulary carries over with one addition. Nodes and edges both hold **properties** *[key-value pairs stored on the node or the edge itself]*, so a "manages" edge between two people can carry the date it started, and that date lives nowhere except on the edge.
+
+```
+(Ana:Person {name:"Ana"}) -[:MANAGES {since:2021}]-> (Priya:Person {name:"Priya"})
+```
+
+### 10.1 Why the relationship is stored, not computed
+
+In a relational schema a relationship is a value you match on. "Who does Ana manage" is a join. "Who do the people Ana manages manage" is a second join. Every extra hop is another join, and the work grows with the size of the tables being joined rather than with the size of the answer.
+
+A graph database stores the connection itself. A node physically holds references to the edges attached to it, so following one is a hop rather than a lookup - the term for this is **index-free adjacency** *[a node holds direct references to its own edges, so traversing does not go through an index]*. Six hops out from Ana costs roughly what the sixth hop returns, whether the database holds ten thousand people or ten million.
+
+That is the trade. Questions about paths, chains and neighbourhoods get cheap: recommendations, fraud detection - do these four accounts share a device, an address and a phone number between them - and access control, where the question is whether a user reaches a document through any chain of groups at all. Questions that scan or aggregate a whole category, like what the company earned last quarter, do not get cheap, and a graph database is not what you would reach for to answer them.
+
+### 10.2 Querying one
+
+**Neo4j** is the one you are most likely to meet, and its query language is **Cypher**. The syntax draws the pattern you are looking for:
+
+```cypher
+// people managed by someone Ana manages
+MATCH (a:Person {name: 'Ana'})-[:MANAGES]->()-[:MANAGES]->(p:Person)
+RETURN p.name
+```
+
+The arrows are the relationship and its direction. There is no join in there, because nothing was separated that has to be put back together.
+
+Graph querying spent years split across several incompatible languages. **GQL** was published as an ISO standard in 2024, and is the first new ISO database language standard since SQL.
+
+> The relational model computes a relationship at query time. A graph database stores it.
+
+**Consider:**
+
+1. Write down, in plain English, a question about data you have worked with that gets more expensive the more hops it needs. Then write one that does not.
+2. A document database embeds data so that it does not have to follow references. A graph database makes following references cheap. Which of your two questions suits which?
+
+[Back to contents](#contents)
+
+## 11. Sources
 
 1. MongoDB, *Documents* - [mongodb.com/docs](https://www.mongodb.com/docs/manual/core/document/)
 2. MongoDB, *Data Modeling* - [mongodb.com/docs](https://www.mongodb.com/docs/manual/data-modeling/)
@@ -267,5 +352,11 @@ The remaining two families, **wide-column** and **graph**, plus CAP theorem, ACI
 4. MongoDB, *Schema Validation* - [mongodb.com/docs](https://www.mongodb.com/docs/manual/core/schema-validation/)
 5. MongoDB, *Sharding* - [mongodb.com/docs](https://www.mongodb.com/docs/manual/sharding/)
 6. Redis, *Develop with Redis* - [redis.io/docs](https://redis.io/docs/latest/develop/)
+7. Apache Cassandra, *Documentation* - [cassandra.apache.org/doc](https://cassandra.apache.org/doc/latest/)
+8. Google Cloud, *Bigtable overview* - [cloud.google.com/bigtable](https://cloud.google.com/bigtable/docs/overview)
+9. Apache HBase, *The Apache HBase Reference Guide* - [hbase.apache.org](https://hbase.apache.org/book.html)
+10. Neo4j, *Getting Started* - [neo4j.com/docs](https://neo4j.com/docs/getting-started/)
+11. Neo4j, *Cypher Manual* - [neo4j.com/docs](https://neo4j.com/docs/cypher-manual/current/)
+12. ISO/IEC 39075:2024, *Information technology - Database languages - GQL*. Cited by name; the standard sits behind the ISO catalogue and the link is not reproduced here.
 
 [Back to contents](#contents)
