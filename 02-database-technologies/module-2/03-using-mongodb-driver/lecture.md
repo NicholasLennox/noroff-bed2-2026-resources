@@ -4,16 +4,12 @@
 
 **By the end of this lesson you should be able to:**
 
-1. **Install** the MongoDB Node.js driver in a project.
-2. **Write** an async `main` function that closes its database connection whether or not an error was thrown.
-3. **Connect** to a local MongoDB server with a `MongoClient` and a connection string.
-4. **Fix** a connection refused on `::1` by making the driver use IPv4.
-5. **Seed** a collection by emptying it and inserting a known set of documents.
-6. **Query** a collection from Node with a filter and a projection.
-7. **Move** the connection string and database name out of the code and into a `.env` file.
-8. **Explain** why the client, the database and its collections belong together in one module.
-9. **Find** a single document by its `_id` using `ObjectId`.
-10. **Insert** a document and use the `insertedId` that comes back.
+1. **Demonstrate** a connection to a local MongoDB server using the Node.js driver's `MongoClient`.
+2. **Explain** why `client.close()` belongs in a `finally` block.
+3. **Analyze** a `connect ECONNREFUSED ::1` error to find its cause.
+4. **Use** the driver's CRUD methods to seed and query a collection.
+5. **Explain** why the client, the database and its collections belong together in one module.
+6. **Apply** `ObjectId` to find a document by its `_id`.
 
 ## Contents
 
