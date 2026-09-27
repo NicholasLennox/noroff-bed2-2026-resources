@@ -1,0 +1,22 @@
+services:
+  db:
+    image: mongo:8
+    container_name: books-db
+    ports:
+      - "27017:27017" # So npm run dev on your machine can reach it too
+    volumes:
+      - books-data:/data/db # Keeps the books when the container is removed
+
+  app:
+    image: books-api # Built first with: docker build -t books-api .
+    container_name: books-api
+    environment:
+      PORT: 3000
+      MONGODB_URI: mongodb://db:27017/books # "db" is the service name above
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+volumes:
+  books-data:

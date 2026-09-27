@@ -1,0 +1,89 @@
+@baseUrl = http://localhost:3000
+
+### Hello
+GET {{baseUrl}}/
+
+### Health
+GET {{baseUrl}}/health
+
+### Create a book - the response id is saved for the requests below
+# @name createBook
+POST {{baseUrl}}/books
+Content-Type: application/json
+
+{
+  "title": "The Hobbit",
+  "authors": ["J.R.R. Tolkien"],
+  "year": 1937,
+  "genres": ["fantasy", "adventure"],
+  "isbn": "978-0261103344",
+  "tags": ["classic"]
+}
+
+### Create a second book
+POST {{baseUrl}}/books
+Content-Type: application/json
+
+{
+  "title": "The Pragmatic Programmer",
+  "authors": ["Andrew Hunt", "David Thomas"],
+  "year": 2019,
+  "genres": ["software"],
+  "isbn": "978-0135957059",
+  "tags": ["classic", "career"]
+}
+
+### All books, sorted by title
+GET {{baseUrl}}/books
+
+### One book
+GET {{baseUrl}}/books/{{createBook.response.body._id}}
+
+### Update it
+PUT {{baseUrl}}/books/{{createBook.response.body._id}}
+Content-Type: application/json
+
+{
+  "title": "The Hobbit",
+  "authors": ["J.R.R. Tolkien"],
+  "year": 1937,
+  "genres": ["fantasy", "adventure", "children"],
+  "isbn": "978-0261103344",
+  "tags": ["classic"]
+}
+
+### Search - any combination of title, author and tag
+GET {{baseUrl}}/books?author=thomas
+
+###
+GET {{baseUrl}}/books?tag=classic&limit=1
+
+### 400 - validation: no authors, year too early
+POST {{baseUrl}}/books
+Content-Type: application/json
+
+{
+  "title": "Broken",
+  "authors": [],
+  "year": 1200,
+  "isbn": "000-0000000000"
+}
+
+### 400 - duplicate isbn (run "Create a book" first)
+POST {{baseUrl}}/books
+Content-Type: application/json
+
+{
+  "title": "Another Hobbit",
+  "authors": ["Someone Else"],
+  "isbn": "978-0261103344"
+}
+
+### 400 - not an ObjectId
+GET {{baseUrl}}/books/not-an-id
+
+### 404 - a valid id that doesn't exist
+GET {{baseUrl}}/books/650000000000000000000000
+
+### Delete it
+DELETE {{baseUrl}}/books/{{createBook.response.body._id}}
