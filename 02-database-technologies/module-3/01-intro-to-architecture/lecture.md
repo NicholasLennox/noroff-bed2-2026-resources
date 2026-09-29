@@ -47,6 +47,8 @@ Some of those things are cheap to change later. You can move a door or repaint a
 
 You have already drawn an architecture. Recall the shape of the systems you've built so far: a front end that calls an API, and an API that reads and writes a database. That three-box sketch is a blueprint. It leaves out every line of code and still tells you how the system is built.
 
+![A house with its load-bearing walls, columns and roof labelled, its floor plan as a blueprint, and a front end, API and database sketched as a system](boards/01-intro-building-analogy.jpeg)
+
 > Architecture is the part of a system that is expensive to change afterwards.
 
 [Back to contents](#contents)
@@ -56,6 +58,8 @@ You have already drawn an architecture. Recall the shape of the systems you've b
 A box has three dimensions: height, width and length. With those three numbers you can describe any box.
 
 The textbook this module follows, *Head First Software Architecture*, describes software architecture with four dimensions. They aren't measurements. They are **lenses** *[ways of looking at the same system that each show you something different]*, and you need all four to describe a system properly.
+
+![A box described by height, width and length, next to the first two dimensions of software architecture: characteristics and decisions](boards/02-dimensions-of-architecture.jpeg)
 
 ### 2.1 Architectural characteristics
 
@@ -71,6 +75,8 @@ For example, a system might need to serve 10,000 users at once, stream video, be
 
 You have made both of these decisions already this subject, every time you chose between SQL Server and MongoDB, or put an Express API in front of a database. They are architectural because undoing them later means rewriting a large part of the system.
 
+![Logical components and architectural styles, with code split by technical concern into horizontal layers or by domain into vertical layers, and the partitioning and deployment grid starting to form](boards/03-dimensions-and-partitioning.jpeg)
+
 ### 2.3 Logical components
 
 **Logical components** are the building blocks of the system - the things it does, named by what they are for.
@@ -85,6 +91,8 @@ The **architectural style** is the overall physical shape of the system. It's th
 - How is the system deployed?
 
 The next two sections take those questions one at a time, because each has two answers, and putting them together gives you the styles.
+
+
 
 [Back to contents](#contents)
 
@@ -146,6 +154,8 @@ Take an online shop with three logical components: customer, payment and shippin
 
 The cost is on the deployment side. Change one line in the shipping code and the whole unit - customer, payment and shipping - gets rebuilt and redeployed together.
 
+![The deployment pipeline from a local change to a running App Service, and a monolith holding customer, payment and shipping as logical components](boards/04-deployment-models-monolith.jpeg)
+
 ### 4.2 Distributed
 
 In a **distributed** deployment *[the system is split into several separately deployed units that run on their own]*, customer, payment and shipping each become their own application.
@@ -203,6 +213,8 @@ The first version is one **service** *[a separately deployed unit of software]* 
 Now suppose the heart-rate monitoring fails. Because it lives in the same service as everything else, the whole service goes down with it, and temperature, blood pressure and every other reading stop being watched too. A patient whose temperature spikes gets no alert because of a bug in the heart-rate code.
 
 What we want is independent monitoring: heart rate can fail while temperature and the rest keep working.
+
+![One service monitoring all vital signs, split down to a service that monitors heart rate, with the definition of a microservice](boards/06-microservices-intro.jpeg)
 
 ### 6.2 One thing, done well
 
