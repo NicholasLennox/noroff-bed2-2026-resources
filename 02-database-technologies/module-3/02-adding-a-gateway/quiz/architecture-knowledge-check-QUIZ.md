@@ -101,6 +101,7 @@ Answer these in a few sentences each, in your own words.
 
 In 2008 a corrupted database took Netflix down for three days. At the time Netflix was a monolith: the whole system was built and deployed as one unit. In microservices, each service does one thing, is deployed on its own, and owns its own data. Microservices give you three benefits: each service can be changed on its own, use its own tech stack, and be scaled on its own.
 
+
 Explain how splitting Netflix into microservices limits the damage a failure like that one can do. Netflix now uses several different databases, including Cassandra, MySQL and Elasticsearch. Which of the three benefits does that show?
 
 **12. Prime Video.** Read [Amazon Prime Video Monitoring Service](https://bytebytego.com/guides/amazon-prime-video-monitoring-service/).
