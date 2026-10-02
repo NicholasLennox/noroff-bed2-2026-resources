@@ -6,14 +6,10 @@
 
 1. **Describe** the document model using its own vocabulary - collection, document, field, `_id`, embedded data and reference.
 2. **Contrast** the relationship-first approach of SQL with the access-pattern-first approach of the document model.
-3. **Discuss** the role of duplication in a document database.
-4. **Decide**, for a given access pattern and cardinality, whether related data should be embedded or referenced.
-5. **Explain** the consequences of a document database not enforcing referential integrity.
-6. **Explain** how a flexible schema leads to schema drift.
-7. **Distinguish** between structured, semi-structured and unstructured data.
-8. **Discuss** the kind of work a key-value store such as Redis is suited to.
-9. **Describe** the workload a wide-column store is built for.
-10. **Explain** why a graph database makes following relationships cheap.
+3. **Decide**, for a given access pattern and cardinality, whether related data should be embedded or referenced.
+4. **Explain** what a document database gives up by not enforcing a schema or referential integrity.
+5. **Distinguish** between structured, semi-structured and unstructured data.
+6. **Describe** the workload each of the other NoSQL families - key-value, wide-column and graph - is suited to.
 
 ## Contents
 
