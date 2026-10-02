@@ -9,8 +9,8 @@
 3. **Use** Sequelize to read and write an Azure SQL table that already exists.
 4. **Apply** a service layer to keep database code out of an Express route.
 5. **Explain** why a browser blocks the website's requests to the gateway until the gateway allows its origin.
-6. **Implement** a CORS rule on the gateway that allows only the website's origin.
-7. **Implement** an API key check on the gateway.
+6. **Use** the `cors` middleware to allow only the website's origin on the gateway.
+7. **Apply** an API key check to the gateway.
 
 ## Contents
 
