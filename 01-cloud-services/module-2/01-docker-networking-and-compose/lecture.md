@@ -2,6 +2,15 @@
 
 > This resource follows the class demo. We ran MySQL in a container, pointed a small Express + Sequelize API at it, and then moved the API into a container as well - at which point it stopped being able to find the database. That failure is the whole lesson. We fix it by hand first with a Docker network, feel how tedious that is, and only then meet **Docker Compose**, which turns the entire setup into one file and one command. Where a word might be new, a plain-English version is given in *[brackets]* right after it.
 
+**By the end of this lesson you should be able to:**
+
+1. **Diagnose** a failed database connection using the API's health endpoint.
+2. **Explain** what publishing a container port with `-p` does.
+3. **Explain** why `localhost` inside a container does not reach another container.
+4. **Use** a Docker network to let containers reach each other by name.
+5. **Construct** a Compose file that runs an API and its database together.
+6. **Use** a named volume to keep a database's data when its containers are removed.
+
 ## 1. Where we left off
 
 In the previous module we containerised a single Express API. One image, one container, `docker run -p 8000:3000`, done. Everything the application needed was inside that one box.

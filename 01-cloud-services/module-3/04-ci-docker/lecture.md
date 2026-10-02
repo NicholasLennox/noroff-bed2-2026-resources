@@ -4,6 +4,15 @@
 
 The finished repository: [github.com/NicholasLennox/ci-with-docker](https://github.com/NicholasLennox/ci-with-docker)
 
+**By the end of this lesson you should be able to:**
+
+1. **Apply** a job dependency so the image is only built after the tests pass.
+2. **Construct** a job that builds a Docker image and pushes it to GitHub Container Registry.
+3. **Diagnose** an image name the registry refuses.
+4. **Distinguish** between adding a tag and changing an image's name.
+5. **Use** repository secrets to give a workflow credentials for Azure Container Registry.
+6. **Explain** why an image is tagged with both `latest` and the commit SHA.
+
 ## 1. Where we left off
 
 [Continuous Integration with GitHub Actions](../03-intro-to-CI/lecture.md) ended with a workflow that checks out the code, installs dependencies and runs the tests. It answers one question - did this change break anything - and then stops.

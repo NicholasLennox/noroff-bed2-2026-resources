@@ -2,6 +2,14 @@
 
 > Before relational databases and SQL, data was organised in other shapes. This lesson covers the first two: the **hierarchical (tree)** model and the **network** model. Terms you may not have met get a plain-English version in brackets.
 
+**By the end of this lesson you should be able to:**
+
+1. **Describe** the shape of the hierarchical model.
+2. **Explain** why a tree cannot represent something connected to more than one parent.
+3. **Describe** the shape of the network model, including direction and weight.
+4. **Model** a set of real-world data as a tree or as a network.
+5. **Classify** a real-world data set as a tree or a network.
+
 ## 1. The hierarchical model
 
 ### 1.1 The shape

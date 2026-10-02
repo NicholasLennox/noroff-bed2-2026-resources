@@ -1,5 +1,12 @@
 # Cloud Services M1 – Self Study
 
+**By the end of this lesson you should be able to:**
+
+1. **Compare** a compute service from AWS with its counterparts on Azure and Google Cloud.
+2. **Explain** how the efficiency of software affects what it costs to run in the cloud.
+3. **Explain** how the behaviour of a workload decides which architecture suits it.
+4. **Evaluate** whether a workload should run in the cloud or on infrastructure the organisation owns.
+
 ## Moodle tasks
 
 Complete the following activities in Moodle before moving on to the case studies.

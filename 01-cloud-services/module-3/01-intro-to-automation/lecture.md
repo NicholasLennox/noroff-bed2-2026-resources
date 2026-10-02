@@ -2,6 +2,15 @@
 
 > Everything we have deployed so far has needed a human at the end of it. We push an image, and then we go and tell Azure to use it. This lesson removes that last step, and the removal is one checkbox - which makes it a poor lesson about clicking and a good one about what has to be true underneath before the checkbox does anything. The central failure is a webhook that fires perfectly and gets a `401` back, because the credentials it needed were never created. Where a word might be new, a plain-English version follows it in *[brackets]*.
 
+**By the end of this lesson you should be able to:**
+
+1. **Explain** why restarting an App Service counts as a deployment.
+2. **Describe** how a registry webhook triggers a deployment.
+3. **Explain** the role of the SCM sidecar next to the application's container.
+4. **Demonstrate** the set-up of continuous deployment from Azure Container Registry to App Service.
+5. **Use** Kudu to inspect the environment and logs of a deployed application.
+6. **Diagnose** a webhook that fails with a `401`.
+
 ## 1. Where we left off
 
 Over the last two lessons we assembled a deployment by hand. [Pushing to Azure Container Registry](../../module-2/03-azure-container-registry/lecture.md) established the naming and credential mechanics, and the [versioned deployments kata](../../module-2/04-practical-acr-app-service/kata/) had you run the whole thing yourself.

@@ -2,6 +2,13 @@
 
 > Everything we have pushed or pulled so far has gone to or come from Docker Hub, and it worked because Docker Hub is public and Docker treats it as the default. This lesson takes our own image and puts it somewhere private, which breaks both of those assumptions at once. The first thing that happens is a `docker push` that fails, and the reason it fails is the mechanic the whole lesson is built on: **the name of an image is the address it gets pushed to**. Once that is clear, the rest - logging in to a private registry, tagging for two destinations, and letting Azure pull the image on our behalf - is the same idea applied three times. Where a word might be new, a plain-English version follows it in *[brackets]*.
 
+**By the end of this lesson you should be able to:**
+
+1. **Explain** how an image's name decides the registry it is pushed to.
+2. **Use** `docker tag` to name one image for more than one registry.
+3. **Demonstrate** pushing an image to a new Azure Container Registry.
+4. **Explain** how a managed identity lets App Service pull from a registry without a stored credential.
+
 ## 1. Where we left off
 
 Two things from earlier lessons meet in this one.

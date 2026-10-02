@@ -2,6 +2,15 @@
 
 > Last lesson ended with SQL Server running in a container and VS Code connected to it. This lesson uses that connection to build a database by hand in T-SQL: a database, four tables, their constraints, seed data, and then queries across all of it. Most of the lesson is watching the server refuse things - duplicate emails, explicit identity values, strings that are not dates, deletes that would orphan rows - because the refusals are what the constraints are for. New terms get a plain-English version in brackets. The finished script is [`class-demo/schema-and-data.sql`](class-demo/schema-and-data.sql) and the queries are [`class-demo/queries.sql`](class-demo/queries.sql). The keywords used are collected in the [quick reference](#11-quick-reference) at the end.
 
+**By the end of this lesson you should be able to:**
+
+1. **Use** T-SQL to create a database and tables with constraints.
+2. **Interpret** the error the server returns when a statement breaks a constraint.
+3. **Use** `INSERT`, `UPDATE` and `DELETE` to change the rows in a table.
+4. **Apply** foreign keys and `CHECK` constraints to keep related tables consistent.
+5. **Construct** a query that joins tables with `JOIN` and `LEFT JOIN`.
+6. **Use** `GROUP BY` with an aggregate to summarise rows.
+
 ## 1. Where we are
 
 [Last lesson](../02-relational-databases-recap/lecture.md) set up the environment: SQL Server 2025 in a container from a Compose file, the **mssql** extension in VS Code, a connection to `localhost` as `sa`, and one `CREATE DATABASE testdb` run against `master` to prove it all worked. Everything here assumes that container is up and that connection exists.

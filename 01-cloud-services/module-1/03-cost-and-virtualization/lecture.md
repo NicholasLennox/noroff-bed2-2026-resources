@@ -1,5 +1,14 @@
 # CapEx vs OpEx, and Hardware Virtualization
 
+**By the end of this lesson you should be able to:**
+
+1. **Contrast** CapEx and OpEx as ways of paying for computing.
+2. **Explain** how the cost of owning a server goes beyond its purchase price.
+3. **Explain** how renting from a provider moves demand-forecasting risk off the customer.
+4. **Describe** the roles of the host, the guest and the hypervisor in virtualization.
+5. **Distinguish** between Type 1 and Type 2 hypervisors.
+6. **Contrast** virtual machines and containers.
+
 ## 1. CapEx vs OpEx
 
 **CapEx (Capital Expenditure)**: buying an asset outright. A large payment upfront, recorded on the balance sheet as an asset, and its cost is spread out over time through depreciation *[the accounting practice of writing off an asset's cost gradually over its useful life; a 100,000 NOK server "costs" 20,000 NOK/year on paper over a 5-year lifespan]*.

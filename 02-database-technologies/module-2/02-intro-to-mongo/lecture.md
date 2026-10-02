@@ -4,20 +4,13 @@
 
 **By the end of this lesson you should be able to:**
 
-1. **Describe** MongoDB as a document database and the data model it stores.
-2. **Distinguish** the operational workload we are using from the other workloads MongoDB supports.
-3. **Install** MongoDB Community Server locally and connect to it with `mongosh`.
-4. **Explain** the relationship between a database, a collection and a document.
-5. **Describe** what BSON adds to JSON and the limits it puts on a document.
-6. **Demonstrate** the creation of a database and collection.
-7. **Insert** one document or many into a collection.
-8. **Write** a `find` query that filters on one or more fields using comparison operators.
-9. **Distinguish** between an inclusion projection and an exclusion projection.
-10. **Explain** why `_id` can be excluded from an inclusion projection when no other field can.
-11. **Update** many documents in one command using a filter and an update operator.
-12. **Describe** the three parts an ObjectId is built from.
-13. **Explain** why an index makes a lookup cheap.
-14. **Contrast** the MongoDB Shell and Compass as ways of running the same query.
+1. **Describe** MongoDB as a document database and the workloads it supports.
+2. **Demonstrate** a connection to a local MongoDB server with `mongosh`.
+3. **Explain** the relationship between a database, a collection and a document.
+4. **Demonstrate** the creation of a database and collection.
+5. **Use** the shell's CRUD commands to insert, filter, update and remove documents.
+6. **Distinguish** between an inclusion projection and an exclusion projection.
+7. **Explain** why an index makes a lookup cheap.
 
 ## Contents
 

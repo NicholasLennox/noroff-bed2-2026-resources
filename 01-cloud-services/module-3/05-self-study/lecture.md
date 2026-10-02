@@ -2,6 +2,14 @@
 
 > Lesson 1 automated a deployment by letting Azure do the work: the registry raised a webhook and the App Service went and pulled. That only works when the registry is Azure's own. This page takes the other route - the pipeline itself tells App Service what to run - and builds it on the GHCR image from lesson 4. Work through it at your own pace. Where a word might be new, a plain-English version follows it in *[brackets]*.
 
+**By the end of this lesson you should be able to:**
+
+1. **Contrast** deploying by pull from a registry webhook with deploying by push from the pipeline.
+2. **Demonstrate** the creation of an App Service from the Azure CLI.
+3. **Use** a publish profile stored as a repository secret to let a pipeline deploy.
+4. **Construct** a deploy job that tells App Service which image to run.
+5. **Explain** why each place an application runs has to supply its own configuration.
+
 ## 1. Why there is a second way to deploy
 
 In [lesson 1](../01-intro-to-automation/lecture.md) we ticked **Continuous deployment** in the Deployment Center and Azure did the rest: it generated a webhook URL pointing at the App Service's SCM endpoint, handed it to Azure Container Registry, and from then on a push to `greeting-api:latest` made the container restart on the new image.

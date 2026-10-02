@@ -2,6 +2,15 @@
 
 > This resource follows the class demo step by step. We took a small Express API (the `/health` kata from a previous lesson) and containerised it. The Dockerfile we started with was **deliberately naive** - each problem we hit afterwards is the reason a particular best practice exists. Where a word might be new, a plain-English version is given in *[brackets]* right after it.
 
+**By the end of this lesson you should be able to:**
+
+1. **Choose** a base image for a Node application.
+2. **Construct** a Dockerfile that orders its steps to make the most of the build cache.
+3. **Use** a `.dockerignore` file to control what goes into the build context.
+4. **Distinguish** between documenting a port with `EXPOSE` and publishing it with `-p`.
+5. **Apply** run-time configuration to a container with environment variables.
+6. **Demonstrate** the sharing of a tagged image on Docker Hub.
+
 ## 1. Docker architecture recap
 
 Docker uses a **client-server architecture**. The piece you type commands into is not the piece that does the work.

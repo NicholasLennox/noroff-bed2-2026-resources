@@ -2,6 +2,13 @@
 
 > This resource is based on definitions from **NIST** (the U.S. National Institute of Standards and Technology), the organization whose definitions are the industry-standard starting point for describing cloud computing. Where a word might be new or tricky, a plain-English version is given in *[brackets]* right after it.
 
+**By the end of this lesson you should be able to:**
+
+1. **Define** cloud computing using NIST's description of it.
+2. **Describe** the role of each of the five cloud actors.
+3. **Explain** the five essential characteristics of cloud computing.
+4. **Interpret** market share figures for the major cloud providers.
+5. **Distinguish** between the kinds of page a cloud provider publishes.
 
 ## 1. What is Cloud Computing?
 

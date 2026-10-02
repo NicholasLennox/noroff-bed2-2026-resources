@@ -2,6 +2,15 @@
 
 > Last lesson we automated a deployment out of `main`. This one is about what is allowed to reach `main` in the first place. We build a pipeline in three stages - make something run, make it able to fail, then move it to where a failure can still be stopped. Where a word might be new, a plain-English version follows it in *[brackets]*.
 
+**By the end of this lesson you should be able to:**
+
+1. **Contrast** continuous integration and continuous deployment.
+2. **Describe** the parts a GitHub Actions workflow is made of.
+3. **Construct** a workflow that fails when the tests fail.
+4. **Apply** GitHub Flow to get a change onto `main` through a pull request.
+5. **Explain** why a check on a pull request prevents damage that a check on `main` only reports.
+6. **Explain** when branch protection should be turned on.
+
 ## 1. Where we left off
 
 In [Automating a Deployment](../01-intro-to-automation/lecture.md) we removed the last human step from a deployment. A push to the container registry fires a webhook, the App Service's SCM sidecar receives it, the image is pulled, the container restarts. The [continuous deployment kata](../02-practical-cd-app-service/kata/) had you build that yourself.

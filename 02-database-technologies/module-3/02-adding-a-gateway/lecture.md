@@ -8,7 +8,7 @@
 2. **Distinguish** between disintegrating and integrating factors.
 3. **Describe** the problems a client faces when it calls each service directly.
 4. **Explain** the role of an API gateway as the single entry point to a set of services.
-5. **Implement** a logging middleware that records every request through the gateway.
+5. **Use** a logging middleware to record every request through the gateway.
 6. **Apply** a rate limit to the requests that reach the gateway.
 
 ## Contents

@@ -2,6 +2,14 @@
 
 > Builds on the 5 essential characteristics and the 5 cloud actors. As before, tricky terms get a plain-English version in *[brackets]*.
 
+**By the end of this lesson you should be able to:**
+
+1. **Describe** the four cloud deployment models.
+2. **Contrast** IaaS, PaaS and SaaS by what you manage and what the provider manages.
+3. **Explain** the split of security responsibility between you and the provider under each service model.
+4. **Calculate** the downtime an SLA's uptime percentage allows in a month.
+5. **Explain** the limits of what an SLA promises.
+
 ## 1. Cloud Deployment Models
 
 *(Source: NIST SP 800-145 - [nvlpubs.nist.gov](https://nvlpubs.nist.gov))*

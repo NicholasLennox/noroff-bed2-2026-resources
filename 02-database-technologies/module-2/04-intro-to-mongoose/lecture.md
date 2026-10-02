@@ -8,7 +8,7 @@
 2. **Explain** how Mongoose uses change tracking to decide what `save()` sends to the database.
 3. **Demonstrate** the definition of a schema and the model compiled from it.
 4. **Use** built-in validators to constrain the fields of a schema.
-5. **Implement** error handling that separates a `ValidationError` from other errors.
+5. **Apply** error handling that separates a `ValidationError` from other errors.
 6. **Apply** a static to a schema so a common query lives on the model.
 7. **Use** the `timestamps` option to record when documents are created and updated.
 

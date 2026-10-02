@@ -2,6 +2,13 @@
 
 > This week you took an API from an empty folder to a container running on the public internet, and you did it twice - once as `alpha`, once as `beta`. This page has three parts, in order of priority: finishing the practical work, the Moodle task and its solution video, and a short set of readings that put what you did into a wider context. The readings are recommended rather than required, and you are not expected to get through all of them.
 
+**By the end of this lesson you should be able to:**
+
+1. **Contrast** an image tag with an image label.
+2. **Explain** why configuration belongs outside the code.
+3. **Describe** how a platform uses an application's health endpoint.
+4. **Discuss** how the same container commands are used differently at a larger scale.
+
 ## 1. Before anything else
 
 The last lesson was a large practical. If Kata 3 is incomplete - if your registry does not yet hold `alpha`, `beta` and `latest`, or if `/health` on your Azure URL is not reporting `production` - complete it before continuing here.

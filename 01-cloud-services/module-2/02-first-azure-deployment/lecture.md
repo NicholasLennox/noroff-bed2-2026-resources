@@ -2,6 +2,14 @@
 
 > Everything we have built so far has run on our own machines. This lesson takes a container image and runs it on someone else's computer for the first time. Most of the work is not the deployment itself - that turns out to be a form with six tabs - it is deciding **which** Azure service is the right place for a web API in a container, and then finding where the ideas we already know (images, ports, environment variables, registries) have been hidden in someone else's dashboard. Where a word might be new, a plain-English version follows it in *[brackets]*.
 
+**By the end of this lesson you should be able to:**
+
+1. **Justify** the choice of Azure service for running a web API in a container.
+2. **Describe** how Azure organises the resources in an account.
+3. **Demonstrate** the deployment of a container image to an Azure Web App.
+4. **Explain** the role of the App Service plan in what a Web App costs.
+5. **Use** App Service environment variables to configure a deployed container.
+
 ## 1. Where we left off
 
 Module 1 ended with a single containerised Express API: one image, one `docker run`, one port published to the host ([Containerising a Node.js API with Docker](../../module-1/04-intro-to-docker/lecture.md)). Yesterday we added a database, watched the API lose it the moment it moved into a container of its own, and fixed that with a network and then with Docker Compose ([Docker Networking and Docker Compose](../01-docker-networking-and-compose/lecture.md)). The kata that goes with this lesson is that same work done from scratch on a project that has none of it.

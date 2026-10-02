@@ -2,6 +2,15 @@
 
 > You have worked with relational databases before. This lesson re-establishes the vocabulary, spends longer than last year on ACID and transactions, redraws an ERD, and ends with a SQL Server instance running in Docker on your machine - the environment for the rest of the course. Terms you may not have met, or may have forgotten, get a plain-English version in brackets.
 
+**By the end of this lesson you should be able to:**
+
+1. **Define** the core vocabulary of a relational database.
+2. **Explain** each of the four ACID properties.
+3. **Describe** the lifecycle of a transaction.
+4. **Model** a domain as a physical ERD, with a linking table for each many-to-many relationship.
+5. **Distinguish** between a surrogate key and a composite key.
+6. **Demonstrate** a connection from VS Code to SQL Server running in Docker.
+
 ## 1. Where we are
 
 [Last lesson](../01-early-data-models/lecture.md) covered two shapes data was stored in before SQL: the **tree** (`1:M`, one path to everything) and the **network** (`M:M`, links carry data).
