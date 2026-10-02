@@ -1,15 +1,15 @@
 # Connecting Azure SQL and a Website
 
-> In this lesson you will create an Azure SQL database in the Azure portal, connect to it from VS Code, and build a user service that reads and writes it with Sequelize. You will put the gateway in front of that service and a website in front of the gateway, watch the browser block every request the website makes, and fix it with CORS. You will then clean the database code out of the user service's routes, and lock the gateway with an API key - which breaks the website again until it sends the key. New terms get a plain-English version in brackets.
+> In this lesson you will create an Azure SQL database in the Azure portal, connect to it from VS Code, and build a user service that reads and writes it with Sequelize, with the database code kept in services and out of its routes. You will put the gateway in front of that service and a website in front of the gateway, watch the browser block every request the website makes, and fix it with CORS. You will then lock the gateway with an API key - which breaks the website again until it sends the key. New terms get a plain-English version in brackets.
 
 **By the end of this lesson you should be able to:**
 
 1. **Demonstrate** the creation of an Azure SQL database and its server in the Azure portal.
 2. **Explain** how the server firewall decides which clients can connect to an Azure SQL database.
 3. **Implement** a Sequelize connection to Azure SQL from the values in its connection string.
-4. **Explain** why a browser blocks a request from one origin to another until the server allows it.
-5. **Implement** a CORS rule on the gateway that allows only the website's origin.
-6. **Apply** a service layer to keep database code out of an Express route.
+4. **Apply** a service layer to keep database code out of an Express route.
+5. **Explain** why a browser blocks a request from one origin to another until the server allows it.
+6. **Implement** a CORS rule on the gateway that allows only the website's origin.
 7. **Implement** an API key check on the gateway.
 
 ## Contents
@@ -26,8 +26,10 @@
 4. [The user service](#4-the-user-service)
    - [4.1 Connecting with Sequelize](#41-connecting-with-sequelize)
    - [4.2 A model for a table that already exists](#42-a-model-for-a-table-that-already-exists)
-   - [4.3 The routes](#43-the-routes)
-   - [4.4 Running it](#44-running-it)
+   - [4.3 Services](#43-services)
+   - [4.4 Error middleware](#44-error-middleware)
+   - [4.5 The routes](#45-the-routes)
+   - [4.6 Running it](#46-running-it)
 5. [The gateway](#5-the-gateway)
 6. [The website](#6-the-website)
    - [6.1 Serving the page](#61-serving-the-page)
@@ -38,14 +40,11 @@
    - [7.3 The preflight](#73-the-preflight)
    - [7.4 More than one origin](#74-more-than-one-origin)
 8. [Searching for users](#8-searching-for-users)
-9. [Cleaning up the user service](#9-cleaning-up-the-user-service)
-   - [9.1 Services](#91-services)
-   - [9.2 Error middleware](#92-error-middleware)
-10. [The gateway as the front door](#10-the-gateway-as-the-front-door)
-    - [10.1 Logging](#101-logging)
-    - [10.2 An API key](#102-an-api-key)
-    - [10.3 Sending the key](#103-sending-the-key)
-11. [Sources](#11-sources)
+9. [The gateway as the front door](#9-the-gateway-as-the-front-door)
+   - [9.1 Logging](#91-logging)
+   - [9.2 An API key](#92-an-api-key)
+   - [9.3 Sending the key](#93-sending-the-key)
+10. [Sources](#10-sources)
 
 ## 1. Connecting it all together
 
@@ -303,83 +302,222 @@ The table was made first, so the model has to match it exactly:
 
 There's also no `sequelize.sync()` anywhere in the service. `sync()` creates tables from the models, and the table already exists.
 
-### 4.3 The routes
+### 4.3 Services
 
-The first version of `src/app.js` had everything in it: the routes and the Sequelize calls side by side.
+A route's job is the request and the response: read what came in, and send something back. Fetching users is a different job. If the Sequelize calls go straight into the routes, every route has to know the model's methods and the table's column names, and changing how users are stored means editing every route.
+
+So the database code goes in a **service** *[here, a class that holds the database code for one kind of thing]*, and the routes call its methods. Recall the `BookService` from the Mongoose API: the model was passed into the constructor, and the routes never touched the model themselves. `user-service/src/services/userService.js` is the same shape:
+
+```js
+// Everything that talks to the Users table lives here. The routes in app.js
+// only deal with requests and responses - they never see Sequelize.
+class UserService {
+  // The model is passed in rather than required here, so app.js decides what
+  // the service talks to
+  constructor (User) {
+    this.User = User
+  }
+
+  // All users.
+  list () {
+    return this.User.findAll()
+  }
+
+  getById (id) {
+    return this.User.findByPk(id)
+  }
+
+  getByEmail (email) {
+    return this.User.findOne({ where: { Email: email } })
+  }
+
+  // The API takes lowercase fields; the table columns are PascalCase.
+  create ({ username, email }) {
+    return this.User.create({
+      Username: username,
+      Email: email
+    })
+  }
+}
+
+module.exports = UserService
+```
+
+`create` is where the API's lowercase `username` and `email` become the table's `Username` and `Email` columns. A route passes `{ username, email }` and doesn't need to know what the columns are called. It doesn't pass `UserId` or `CreateAt` either, because the database fills those in.
+
+The health check needs the database too, to ask whether Azure SQL can still be reached. That gets its own small service, `src/services/healthService.js`:
+
+```js
+// Answers one question for /health: can this service still reach Azure SQL?
+class HealthService {
+  constructor (sequelize) {
+    this.sequelize = sequelize
+  }
+
+  async isDatabaseConnected () {
+    try {
+      await this.sequelize.authenticate()
+
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+}
+
+module.exports = HealthService
+```
+
+`authenticate()` signs in and runs a trivial query. `isDatabaseConnected()` turns that into a plain `true` or `false`, so the route doesn't have to deal with a Sequelize error.
+
+### 4.4 Error middleware
+
+Any call to the database can fail. The connection can drop, or the data can break a rule in the model, such as a POST with no `username` when the model says `allowNull: false`. Something has to turn that failure into a response. A `try`/`catch` in every route would repeat the same 500 in each one, and the POST's would also have to recognise Sequelize's validation error by name - Sequelize back in a route.
+
+Express has a place for this. **Error-handling middleware** is middleware with four arguments instead of three - `(err, req, res, next)` - and it's defined "last, after other `app.use()` and routes calls" ([Error handling](https://expressjs.com/en/guide/error-handling.html)). In Express 5, when an `async` route throws, the error is passed to it automatically - their errors "reach Express with no extra work". So the routes don't need a `try`/`catch` at all.
+
+`user-service/src/middleware/errorHandler.js`:
+
+```js
+// Four arguments is what tells Express this is an error handler.
+// Express 5 sends anything thrown in an async route here.
+function errorHandler (err, req, res, next) {
+  // Sequelize: the data broke a rule in the model (e.g. a missing username)
+  if (err.name === 'SequelizeValidationError') {
+    return res.status(400).json({
+      error: 'Validation failed',
+      details: err.errors.map((e) => e.message)
+    })
+  }
+
+  console.error(err)
+
+  res.status(500).json({ error: 'Something went wrong' })
+}
+
+module.exports = errorHandler
+```
+
+Recall the error handler in the Mongoose API. It's the same shape - there it caught Mongoose's `ValidationError`, here it catches Sequelize's.
+
+A validation error is the client's fault, so it gets a **400** with the reasons. Anything else is a **500** with a general message. The real error is printed in the user service's terminal, not sent to the client.
+
+### 4.5 The routes
+
+`src/app.js` brings the pieces together. Require them at the top, with `express`:
+
+```js
+const db = require('./models')
+const UserService = require('./services/userService')
+const HealthService = require('./services/healthService')
+const errorHandler = require('./middleware/errorHandler')
+```
+
+Create each service once, below `const app = express()`:
+
+```js
+const userService = new UserService(db.User)
+const healthService = new HealthService(db.sequelize)
+```
+
+This is where each service is handed what it talks to: the `User` model for one, the Sequelize instance for the other.
+
+The `/health` route goes below `app.use(express.json())`:
+
+```js
+// Health endpoint.
+// `service` says which service answered once requests come through the
+// gateway. `database` says whether this service can still reach Azure SQL.
+app.get('/health', async (req, res) => {
+  const connected = await healthService.isDatabaseConnected()
+
+  res.status(connected ? 200 : 503).json({
+    status: connected ? 'ok' : 'degraded',
+    service: SERVICE_NAME,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    environment: ENVIRONMENT,
+    database: connected ? 'connected' : 'disconnected'
+  })
+})
+```
+
+As well as the service name, it reports whether the database can be reached, and answers **503 Service Unavailable** if it can't. That's the line you check first when something isn't working.
+
+The user routes go below `/health`. None of them has a `try`/`catch`, and a comment above them says why:
+
+```js
+// No try/catch in the routes below. If anything throws, Express 5 passes the
+// error to errorHandler at the bottom of this file.
+```
+
+All users is a GET on `/`:
 
 ```js
 // All users.
 app.get('/', async (req, res) => {
-  try {
-    const users = await db.User.findAll()
+  const users = await userService.list()
 
-    res.status(200).json(users)
-  } catch (error) {
-    res.status(500).json({ error: 'Could not fetch users' })
-  }
+  res.status(200).json(users)
 })
+```
 
+A user by email, then a user by id:
+
+```js
 // User by email.
 // This has to sit above /:id. Express matches routes in order, and /:id
 // would otherwise swallow /email/... as an id.
 app.get('/email/:email', async (req, res) => {
-  try {
-    const user = await db.User.findOne({ where: { Email: req.params.email } })
+  const user = await userService.getByEmail(req.params.email)
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' })
-    }
-
-    res.status(200).json(user)
-  } catch (error) {
-    res.status(500).json({ error: 'Could not fetch user' })
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' })
   }
+
+  res.status(200).json(user)
 })
 
 // User by id.
 app.get('/:id', async (req, res) => {
-  try {
-    const user = await db.User.findByPk(req.params.id)
+  const user = await userService.getById(req.params.id)
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' })
-    }
-
-    res.status(200).json(user)
-  } catch (error) {
-    res.status(500).json({ error: 'Could not fetch user' })
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' })
   }
-})
 
-// Create a user.
-app.post('/', async (req, res) => {
-  try {
-    const user = await db.User.create({
-      Username: req.body.username,
-      Email: req.body.email
-    })
-
-    res.status(201).json(user)
-  } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: error.errors.map((e) => e.message)
-      })
-    }
-
-    res.status(500).json({ error: 'Could not create user' })
-  }
+  res.status(200).json(user)
 })
 ```
 
 A user by email is `/email/:email`, not `/:email`. To Express, `/:email` and `/:id` are the same route - one segment after the slash - so whichever comes first would get every request. Giving email its own prefix, and putting it above `/:id`, keeps them apart.
 
-POST takes `username` and `email` in lowercase, as JSON, and maps them to the table's `Username` and `Email` columns. It doesn't send `UserId` or `CreateAt`, because the database fills those in.
+A user that doesn't exist isn't an error. `findByPk` and `findOne` return `null`, and the route answers that with a 404 itself.
 
-There's also a `/health` endpoint. As well as the service name, it asks the database whether it can still be reached, and answers `503` if it can't. That's the line you check first when something isn't working.
+Creating a user is a POST on `/`, taking `username` and `email` as JSON:
 
-### 4.4 Running it
+```js
+// Create a user.
+app.post('/', async (req, res) => {
+  const user = await userService.create({
+    username: req.body.username,
+    email: req.body.email
+  })
+
+  res.status(201).json(user)
+})
+```
+
+The error handler goes at the very bottom, below the last route and above `module.exports`:
+
+```js
+// Last, after every route - it only sees errors the routes above threw.
+app.use(errorHandler)
+```
+
+Each route now only calls the service and sends the result. Sequelize appears in the models, the services and the error handler, and nowhere in the routes.
+
+### 4.6 Running it
 
 `src/server.js` connects to the database, then starts listening:
 
@@ -435,6 +573,16 @@ curl -X POST http://localhost:3001/ -H "Content-Type: application/json" -d '{"us
 
 We sent two fields and got four back. `UserId` came from `IDENTITY`, and `CreateAt` from the `DEFAULT` - the database filled both, and Sequelize returned the row as it was inserted.
 
+Three requests show the error handler at work:
+
+| Request | Response | Why |
+|---|---|---|
+| POST with no `username` | `400 {"error":"Validation failed","details":["User.Username cannot be null"]}` | `allowNull: false` on the model |
+| `GET /abc` | `500 {"error":"Something went wrong"}` | SQL Server can't turn `abc` into an `INT`. The real error is printed in the user service's terminal, not sent to the client |
+| `GET /99` | `404 {"error":"User not found"}` | Not an error at all - the route answers it directly |
+
+> Routes handle the request and the response; services handle the data; the error handler handles what goes wrong.
+
 [Back to contents](#contents)
 
 ## 5. The gateway
@@ -461,7 +609,7 @@ app.use('/users', proxy(USER_SERVICE_URL))
 
 So `localhost:3000/users` is the user service's `/`, and `localhost:3000/users/1` is its `/1`. Clients now only ever use port 3000.
 
-The gateway starts with nothing else - no logging, no rate limit. It gets new jobs in [section 7](#7-cors) and [section 10](#10-the-gateway-as-the-front-door).
+The gateway starts with nothing else - no logging, no rate limit. It gets new jobs in [section 7](#7-cors) and [section 9](#9-the-gateway-as-the-front-door).
 
 [Back to contents](#contents)
 
@@ -619,37 +767,46 @@ With the page working, the search showed two problems. The text box was there ev
 
 The partial match needs the database, not the page. In SQL that's `LIKE` with `%` either side: `Email LIKE '%gra%'` matches any email with `gra` anywhere in it. Sequelize writes `LIKE` with the `Op.like` operator ([Model querying basics](https://sequelize.org/docs/v6/core-concepts/model-querying-basics/)).
 
-Searching a list is a filter on the list, so it's a query string on `/`, not a new path: `/users?email=gra`. The all-users route in `user-service/src/app.js` became:
+Searching a list is a filter on the list, so it's a query string on `/`, not a new path: `/users?email=gra`.
+
+The `LIKE` is database code, so it goes in the service. In `user-service/src/services/userService.js`, `list` takes an optional `email` and builds the filter from it:
 
 ```js
-// All users, or only those whose email contains ?email=...
-// LIKE '%gra%' matches any email with "gra" anywhere in it.
-app.get('/', async (req, res) => {
-  try {
+  // All users, or only those whose email contains `email`.
+  // LIKE '%gra%' matches any email with "gra" anywhere in it.
+  list ({ email } = {}) {
     const where = {}
 
-    if (req.query.email) {
-      where.Email = { [Op.like]: `%${req.query.email}%` }
+    if (email) {
+      where.Email = { [Op.like]: `%${email}%` }
     }
 
-    const users = await db.User.findAll({ where })
-
-    res.status(200).json(users)
-  } catch (error) {
-    res.status(500).json({ error: 'Could not fetch users' })
+    return this.User.findAll({ where })
   }
-})
 ```
 
-with `Op` required at the top of the file:
+with `Op` required at the top of the same file:
 
 ```js
 const { Op } = require('sequelize')
 ```
 
-With no `?email=`, `where` stays empty and `findAll` returns everyone, as before.
+With no `email`, `where` stays empty and `findAll` returns everyone, as before. The `= {}` lets `list()` still be called with nothing at all.
 
-The page swapped the dropdown for a single search box and decides which endpoint to call from what you type. In `users.js`:
+The route in `user-service/src/app.js` only has to pass the query string on:
+
+```js
+// All users, or only those whose email contains ?email=...
+app.get('/', async (req, res) => {
+  const users = await userService.list({ email: req.query.email })
+
+  res.status(200).json(users)
+})
+```
+
+That fixes the partial match. The empty text box is a problem with the page, so the rest of the change is back in the website, in `website/public/users.js` - the script the browser runs.
+
+The page dropped the dropdown and kept a single search box. Instead of you choosing the kind of search, the script works it out from what you type and picks the endpoint to call:
 
 ```js
 // One search box, three meanings:
@@ -673,187 +830,11 @@ The gateway didn't change. The query string passes through the proxy, so `/users
 
 [Back to contents](#contents)
 
-## 9. Cleaning up the user service
-
-Look back at the routes in `user-service/src/app.js`. They're full of Sequelize: `findAll`, `Op.like`, `findByPk`, the `Username` and `Email` column names, and `error.name === 'SequelizeValidationError'` in the POST. Every route also has the same `try`/`catch` wrapped around it, ending in a 500.
-
-A route's job is the request and the response. How the data is fetched, and what to do when that fails, can live somewhere else. Nothing in this section changes what the service does from the outside - same URLs, same responses - and the gateway and website don't change at all.
-
-### 9.1 Services
-
-A **service** here is a class that holds the database code for one kind of thing. Recall the `BookService` from the Mongoose API: the model was passed into the constructor, and the routes called its methods. `user-service/src/services/userService.js` is the same shape:
-
-```js
-const { Op } = require('sequelize')
-
-// Everything that talks to the Users table lives here. The routes in app.js
-// only deal with requests and responses - they never see Sequelize.
-class UserService {
-  // The model is passed in rather than required here, so app.js decides what
-  // the service talks to
-  constructor (User) {
-    this.User = User
-  }
-
-  // All users, or only those whose email contains `email`.
-  // LIKE '%gra%' matches any email with "gra" anywhere in it.
-  list ({ email } = {}) {
-    const where = {}
-
-    if (email) {
-      where.Email = { [Op.like]: `%${email}%` }
-    }
-
-    return this.User.findAll({ where })
-  }
-
-  getById (id) {
-    return this.User.findByPk(id)
-  }
-
-  getByEmail (email) {
-    return this.User.findOne({ where: { Email: email } })
-  }
-
-  // The API takes lowercase fields; the table columns are PascalCase.
-  create ({ username, email }) {
-    return this.User.create({
-      Username: username,
-      Email: email
-    })
-  }
-}
-
-module.exports = UserService
-```
-
-`Op` is now only required here. The mapping from the API's lowercase `username` and `email` to the table's `Username` and `Email` moved here too, so a route passes `{ username, email }` and doesn't need to know what the columns are called.
-
-The health check's database call got the same treatment, in `src/services/healthService.js`:
-
-```js
-// Answers one question for /health: can this service still reach Azure SQL?
-class HealthService {
-  constructor (sequelize) {
-    this.sequelize = sequelize
-  }
-
-  async isDatabaseConnected () {
-    try {
-      await this.sequelize.authenticate()
-
-      return true
-    } catch (error) {
-      return false
-    }
-  }
-}
-
-module.exports = HealthService
-```
-
-`src/app.js` creates both once, near the top, below `const app = express()`:
-
-```js
-const userService = new UserService(db.User)
-const healthService = new HealthService(db.sequelize)
-```
-
-and every route calls a service method: `userService.list({ email: req.query.email })`, `userService.getById(req.params.id)`, and so on.
-
-### 9.2 Error middleware
-
-After the services, POST still looked like this:
-
-```js
-// Create a user.
-app.post('/', async (req, res) => {
-  try {
-    const user = await userService.create({
-      username: req.body.username,
-      email: req.body.email
-    })
-
-    res.status(201).json(user)
-  } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
-      return res.status(400).json({
-        error: 'Validation failed',
-        details: error.errors.map((e) => e.message)
-      })
-    }
-
-    res.status(500).json({ error: 'Could not create user' })
-  }
-})
-```
-
-The `SequelizeValidationError` check is Sequelize back in a route, and the other routes each carry their own copy of the `try`/`catch`.
-
-Express has a place for this. **Error-handling middleware** is middleware with four arguments instead of three - `(err, req, res, next)` - and it's defined "last, after other `app.use()` and routes calls" ([Error handling](https://expressjs.com/en/guide/error-handling.html)). In Express 5, when an `async` route throws, the error is passed to it automatically - their errors "reach Express with no extra work".
-
-`user-service/src/middleware/errorHandler.js`:
-
-```js
-// Four arguments is what tells Express this is an error handler.
-// Express 5 sends anything thrown in an async route here.
-function errorHandler (err, req, res, next) {
-  // Sequelize: the data broke a rule in the model (e.g. a missing username)
-  if (err.name === 'SequelizeValidationError') {
-    return res.status(400).json({
-      error: 'Validation failed',
-      details: err.errors.map((e) => e.message)
-    })
-  }
-
-  console.error(err)
-
-  res.status(500).json({ error: 'Something went wrong' })
-}
-
-module.exports = errorHandler
-```
-
-Recall the error handler in the Mongoose API. It's the same shape - there it caught Mongoose's `ValidationError`, here it catches Sequelize's.
-
-Every `try`/`catch` came out of the routes, and the handler went in at the bottom of `src/app.js`, below the last route:
-
-```js
-// Last, after every route - it only sees errors the routes above threw.
-app.use(errorHandler)
-```
-
-The routes are now only "call the service, send the result":
-
-```js
-// Create a user.
-app.post('/', async (req, res) => {
-  const user = await userService.create({
-    username: req.body.username,
-    email: req.body.email
-  })
-
-  res.status(201).json(user)
-})
-```
-
-We checked three requests against it:
-
-| Request | Response | Why |
-|---|---|---|
-| POST with no `username` | `400 {"error":"Validation failed","details":["User.Username cannot be null"]}` | `allowNull: false` on the model |
-| `GET /abc` | `500 {"error":"Something went wrong"}` | SQL Server can't turn `abc` into an `INT`. The real error is printed in the user service's terminal, not sent to the client |
-| `GET /99` | `404 {"error":"User not found"}` | Not an error at all - the route answers it directly |
-
-> Routes handle the request and the response; services handle the data; the error handler handles what goes wrong.
-
-[Back to contents](#contents)
-
-## 10. The gateway as the front door
+## 9. The gateway as the front door
 
 Every request comes in through the gateway, so anything that should apply to all of them goes there once rather than in each service.
 
-### 10.1 Logging
+### 9.1 Logging
 
 Recall the logging middleware from last lesson: a function that logs each request and calls `next()` to pass it on. The gateway got a short version as its first middleware, above CORS:
 
@@ -869,7 +850,7 @@ app.use((req, res, next) => {
 
 With it in place, adding a user from the website shows the preflight from [section 7.3](#73-the-preflight) in the gateway's terminal: an `OPTIONS /users` line, then the `POST /users`.
 
-### 10.2 An API key
+### 9.2 An API key
 
 An **API key** *[a shared secret string a client sends with each request, so the API knows the request comes from an app it recognises]* is the simplest way to stop just anyone calling an API. You've probably met one already: the Google Maps API needs a key that identifies your project "for authentication and billing purposes" ([Google Maps Platform: API keys](https://developers.google.com/maps/documentation/javascript/get-api-key)).
 
@@ -944,7 +925,7 @@ async function request (url, options = {}) {
 
 On a 401 it throws with the status and the `error` from the gateway's JSON, which becomes `Request failed: 401 Missing or invalid API key` in the red alert. Without the `response.ok` check, the page would try to draw the error object as a row in the table.
 
-### 10.3 Sending the key
+### 9.3 Sending the key
 
 The fix is on the website. The key goes next to the gateway address at the top of `users.js`:
 
@@ -973,7 +954,7 @@ Now open DevTools and look at `users.js`. The key is right there, and anyone usi
 
 [Back to contents](#contents)
 
-## 11. Sources
+## 10. Sources
 
 1. Microsoft, [What is the Azure SQL Database service?](https://learn.microsoft.com/en-us/azure/azure-sql/database/sql-database-paas-overview) - Microsoft Learn
 2. Microsoft, [What is a server in Azure SQL Database?](https://learn.microsoft.com/en-us/azure/azure-sql/database/logical-servers) - Microsoft Learn
