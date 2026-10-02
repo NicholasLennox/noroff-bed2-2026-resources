@@ -6,9 +6,9 @@
 
 1. **Demonstrate** the creation of an Azure SQL database and its server in the Azure portal.
 2. **Explain** how the server firewall decides which clients can connect to an Azure SQL database.
-3. **Implement** a Sequelize connection to Azure SQL from the values in its connection string.
+3. **Use** Sequelize to read and write an Azure SQL table that already exists.
 4. **Apply** a service layer to keep database code out of an Express route.
-5. **Explain** why a browser blocks a request from one origin to another until the server allows it.
+5. **Explain** why a browser blocks the website's requests to the gateway until the gateway allows its origin.
 6. **Implement** a CORS rule on the gateway that allows only the website's origin.
 7. **Implement** an API key check on the gateway.
 
