@@ -1,6 +1,6 @@
 # Connecting Azure SQL and a Website
 
-> In this lesson you will create an Azure SQL database in the Azure portal, connect to it from VS Code, and build a user service that reads and writes it with Sequelize, with the database code kept in services and out of its routes. You will put the gateway in front of that service and a website in front of the gateway, watch the browser block every request the website makes, and fix it with CORS. You will then lock the gateway with an API key - which breaks the website again until it sends the key. New terms get a plain-English version in brackets.
+> In this lesson you will create an Azure SQL database in the Azure portal, connect to it from VS Code, and build a user service that reads and writes it with Sequelize, with the database code kept in services and out of its routes. You will put the gateway in front of that service and a website in front of the gateway, watch the browser block every request the website makes, and fix it with CORS. You will then add a rate limit to the gateway and lock it with an API key - which breaks the website again until it sends the key. New terms get a plain-English version in brackets.
 
 **By the end of this lesson you should be able to:**
 
@@ -42,8 +42,9 @@
 8. [Searching for users](#8-searching-for-users)
 9. [The gateway as the front door](#9-the-gateway-as-the-front-door)
    - [9.1 Logging](#91-logging)
-   - [9.2 An API key](#92-an-api-key)
-   - [9.3 Sending the key](#93-sending-the-key)
+   - [9.2 Rate limiting](#92-rate-limiting)
+   - [9.3 An API key](#93-an-api-key)
+   - [9.4 Sending the key](#94-sending-the-key)
 10. [Sources](#10-sources)
 
 ## 1. Connecting it all together
@@ -208,6 +209,8 @@ Recall **Sequelize**, the **ORM** *[object relational mapper - it lets you work 
 ```bash
 npm install express sequelize tedious dotenv
 ```
+
+You may have seen `npm install mssql sequelize` elsewhere. The `mssql` package is built on `tedious`, so installing it pulls `tedious` in too, and that's the only reason Sequelize works with it. Sequelize never uses `mssql` itself. Its dialect for SQL Server is called `mssql`, but the package it loads is `tedious`, and if `tedious` isn't installed it stops with `Please install tedious package manually`.
 
 The values from the connection string go into `user-service/.env`, one per variable:
 
@@ -850,7 +853,49 @@ app.use((req, res, next) => {
 
 With it in place, adding a user from the website shows the preflight from [section 7.3](#73-the-preflight) in the gateway's terminal: an `OPTIONS /users` line, then the `POST /users`.
 
-### 9.2 An API key
+### 9.2 Rate limiting
+
+Recall **rate limiting** from last lesson: the gateway caps how many requests each client can make in a time window, and answers **429 Too Many Requests** once a client goes over. The services behind it never see those requests. We used the same `express-rate-limit` package. In `gateway/`:
+
+```bash
+npm install express-rate-limit
+```
+
+Require it at the top of `gateway/src/app.js`, with the other packages:
+
+```js
+const rateLimit = require('express-rate-limit')
+```
+
+and add the limiter directly below the CORS line:
+
+```js
+// Rate limit: each client (by IP) gets 20 requests a minute, then 429s until
+// the window resets. Low so it can be hit by hand in class.
+// It sits after CORS, so the 429 still carries the CORS header (the page can
+// read it instead of seeing a CORS error), and the preflights CORS answers
+// don't use up the limit.
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many requests, try again in a minute' }
+})
+
+app.use(limiter)
+```
+
+The options are the ones from last lesson: a one-minute window, a limit per client, the limit reported in the `RateLimit` response headers, and the JSON body a rejected client gets. The limit is 20 rather than 5, because the website makes a request every time the page loads or you search.
+
+Last lesson the limiter came first. Now there's a browser calling the gateway, so it goes **after CORS**, for two reasons:
+
+- A 429 sent from above CORS would have no `Access-Control-Allow-Origin` header. The browser would block it, and the page would show `Failed to fetch` instead of the gateway's message.
+- The `cors` middleware answers preflights itself and doesn't pass them on. Below it, the limiter only counts real requests, not the `OPTIONS` the browser sends before them.
+
+Search a few times quickly and the page shows `Request failed: 429 Too many requests, try again in a minute` until the minute is up.
+
+### 9.3 An API key
 
 An **API key** *[a shared secret string a client sends with each request, so the API knows the request comes from an app it recognises]* is the simplest way to stop just anyone calling an API. You've probably met one already: the Google Maps API needs a key that identifies your project "for authentication and billing purposes" ([Google Maps Platform: API keys](https://developers.google.com/maps/documentation/javascript/get-api-key)).
 
@@ -890,7 +935,7 @@ The client sends the key in a header called `x-api-key`. That name is a common c
 
 The `!API_KEY` guard covers a missing `.env` entry. Without it, both sides of the comparison would be `undefined` for a request with no header, they'd be equal, and the request would get in. With it, a missing key refuses everything instead.
 
-Where the check sits matters. The full order in the gateway is now: log, CORS, `/health`, key check, proxy.
+Where the check sits matters. The full order in the gateway is now: log, CORS, rate limit, `/health`, key check, proxy.
 
 - **After CORS**, because the browser's preflight never carries the key. If the check came first, the preflight would get a 401, and every request would fail as a CORS error instead of a clear 401.
 - **After `/health`**, so the gateway's health check stays open.
@@ -925,7 +970,7 @@ async function request (url, options = {}) {
 
 On a 401 it throws with the status and the `error` from the gateway's JSON, which becomes `Request failed: 401 Missing or invalid API key` in the red alert. Without the `response.ok` check, the page would try to draw the error object as a row in the table.
 
-### 9.3 Sending the key
+### 9.4 Sending the key
 
 The fix is on the website. The key goes next to the gateway address at the top of `users.js`:
 

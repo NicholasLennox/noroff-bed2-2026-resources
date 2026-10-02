@@ -3,6 +3,7 @@ require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const proxy = require('express-http-proxy')
+const rateLimit = require('express-rate-limit')
 
 const app = express()
 
@@ -29,6 +30,21 @@ app.use((req, res, next) => {
 // This has to come before the proxy, so it also answers the browser's
 // preflight OPTIONS request for the POST.
 app.use(cors({ origin: ALLOWED_ORIGIN }))
+
+// Rate limit: each client (by IP) gets 20 requests a minute, then 429s until
+// the window resets. Low so it can be hit by hand in class.
+// It sits after CORS, so the 429 still carries the CORS header (the page can
+// read it instead of seeing a CORS error), and the preflights CORS answers
+// don't use up the limit.
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many requests, try again in a minute' }
+})
+
+app.use(limiter)
 
 // Health endpoint for the gateway itself. It says the gateway is up, not that
 // the user service behind it is.
