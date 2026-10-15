@@ -1,0 +1,19 @@
+Cleaning report
+Run:     2026-10-15 14:21:09
+Input:   sales_system_export_2026-09.csv
+Output:  sales_system_export_2026-09_cleaned.csv
+
+Records in:        291
+Records rejected:  52 (17.9%)
+Records out:       239
+
+Rejected by rule
+  hasCustomer         31
+  hasPositiveAmount   9
+  hasPositiveQty      12
+
+Rejected by channel
+  WEB       2 of 125 (1.6%)
+  PHONE     5 of 43 (11.6%)
+  POS-OSL   31 of 70 (44.3%)
+  POS-BGN   14 of 53 (26.4%)

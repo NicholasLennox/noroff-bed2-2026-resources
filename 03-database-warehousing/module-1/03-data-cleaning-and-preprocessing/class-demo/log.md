@@ -1,0 +1,24 @@
+# Log
+
+- Set up the project, with a `start` script that runs `src/main.js`.
+- Installed `csv-parse` and `csv-stringify`, using their `/sync` versions because the whole export fits in memory.
+- Added `data/sales_system_export_2026-09.csv` and the `cleaning-rules.md` template.
+- Sketched the five ETL steps as comments in `src/main.js`.
+- Split the code by job: `src/libs/cleaningRules.js` for the rules, `src/libs/parsing.js` for step 2, `src/libs/summary.js` for printing and `src/libs/report.js` for step 5, so `main.js` holds only the settings and the steps.
+- Built the input and output paths with `path.join(__dirname, ...)`, so the script runs from any folder.
+- Step 1: read the raw CSV with `fs.readFileSync`.
+- Step 2: parsed the CSV into JS objects with `parse`.
+- Rule 1: rewrote the column names in snake_case with `renameColumnsToSnakeCase`, straight after parsing and before anything uses the columns.
+- Step 2: converted the columns listed in `numberColumns` (`qty`, `amount`) from text to numbers with `convertNumberColumns`. Empty cells stay empty, so they are still counted as missing rather than read as 0.
+- Printed a summary of the raw data with `printSummary`: row count, columns, first rows and empty values per column.
+- Step 3: set up the cleaning chain, one `.filter` or `.map` per rule, with the rejects first so the fixes only run on rows that are kept. Each rule returns a new row, so the raw rows stay untouched.
+- Imported the rules as one `cleaningRules` object, so adding a rule never changes the import.
+- Rule 2: rejected rows with no customer with `hasCustomer`, which removes 31 rows.
+- Rule 3: rejected rows with a missing, zero or negative amount with `hasPositiveAmount`, which removes 9 rows.
+- Rule 4: rejected rows with a missing, zero or negative quantity with `hasPositiveQty`, which removes 12 rows.
+- Rule 5: made product names lowercase with `standardiseProduct`.
+- Rule 6: rewrote every date as YYYY-MM-DD with `standardiseDate`. Only the three known formats are converted, and anything else is left as it is.
+- Rule 6: swapped day and month back when the month is wrong but the day matches the export month, which is read from the input file name.
+- Step 4: wrote the cleaned rows to `data/sales_system_export_2026-09_cleaned.csv` with `stringify`.
+- Step 5: printed the same summary for the cleaned rows, to compare with the raw data.
+- Step 5: saved a cleaning report to `reports/`, one timestamped file per run. It shows records in, rejected and out, the rejection rate, and how many rows each rule and each channel lost. POS-OSL loses 44% of its rows, which points at that source system.
