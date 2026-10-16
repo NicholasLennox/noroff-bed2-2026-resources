@@ -1,0 +1,13 @@
+{
+  "name": "shelter-cleaning",
+  "version": "1.0.0",
+  "description": "Cleans one month of animal shelter intake data.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js"
+  },
+  "dependencies": {
+    "csv-parse": "^7.0.3",
+    "csv-stringify": "^6.9.0"
+  }
+}

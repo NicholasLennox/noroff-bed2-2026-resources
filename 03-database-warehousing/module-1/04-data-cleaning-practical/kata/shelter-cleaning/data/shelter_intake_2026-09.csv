@@ -1,0 +1,301 @@
+animal_id,name,species,age_years,weight,weight_unit,vaccinated,shelter
+A001,Bella,Dog,3,24,kg,yes,Oslo
+A002,Milo,cat,2,4200,g,no,Trondheim
+A003,Luna,Cat,,3.8,kg,Yes,Trondheim
+A004,Rex,DOG,45,30,kg,y,Oslo
+A005,Kanin,Rabbit,1,1.9,KG,no, Bergen
+A005,Kanin,Rabbit,1,1.9,KG,no, Bergen
+A006,,Dog,5,18,kg,unknown,Trondheim
+A007,Simba,Cat,4,-4,kg,yes,Bergen
+A008,Max,Dgo,7,27,kg,No,Oslo
+A009,Nala,Guinea pig,2,850,g,true,trondheim
+A010,Charlie,dog,6,0,kg,,Oslo
+A011,Pusur,CAT,11,4.5,Kg,n,Bergen
+A012,Oreo,guinea Pig,1,0.9,kg,yes,Oslo
+A013,Rocky,Dog,9,32,kg,no,Bergen
+A014,Molly,Rabit,3,2100,g,Y,Trondheim
+A015,Tiger,Cat,38,5.1,kg,no,OSLO
+A016,Rocky,dog,13,32.2,kg,no,Bergen
+A017,Odin,Dog,11,39.3,kg,y,Trondheim
+A018,Leo,Dog,11,20.6,kg,no,Bergen
+A019,Trofast,dog,0,24.7,kg,yes,Bergen
+A020,Odin,Rabbit,8,1.5,kg,yes,Oslo
+A021,Bamse,Dog,11,37.2,kg,no,Oslo
+A022,,DOG,8,20.3,kg,y,Trondheim
+A023,,DOG,2,26.0,kg,,Trondheim
+A024,Tassen,Cat,17,3.4,kg,yes,Bergen
+A025,Snoopy,Dog,3,18.0,kg,no,bergen
+A026,Trofast,dOG,6,19.6,kg,yes,Oslo
+A027,Thor,Guinea pig,0,0.7,kg,yes,Oslo
+A028,Iris,dog,13,14.4,kg,yes,Oslo
+A029,Toby,GUINEA PIG,2,1300,g,y,Trondheim
+A030,Iris,Cat,3,5.2,kg,yes,Bergen
+A031,Muffin,Dog,1,7.5,kg,yes,Oslo
+A032,Mango,Cat,13,6.4,kg,no,Bergen
+A033,Kira,Dog,3,14.7,kg,,Oslo
+A034,,Dog,9,5.0,kg,yes,Oslo
+A035,Sasha,Cat,7,2600,g,no,Trondheim
+A036,Loki,Guinea pig,0,1100,g,yes,Bergen
+A037,Jasper,Guinea pig,5,900,g,true,Trondheim
+A038,Luna,RABBIT,5,2100,g,yes,Trondheim
+A039,Thor,Dog,3,7.1,kg,yes,Trondheim
+A040,Daisy,cat,15,6.3,kg,yes,oslo
+A041,Bella,Cat,9,3400,g,yes,Trondheim
+A042,Molly,CAT,11,5.2,kg,yes,Oslo
+A043,Fluffy,Dog,10,10.4,kg,yes,Bergen
+A044,Tiger,Dog,3,15.5,kg,,Trondheim
+A045,Sasha,Dog,10,28.3,kg,no,Oslo
+A046,Sasha,dog,61,29.3,kg,no,Oslo
+A047,Mango,Cat,,3.3,kg,yes, Bergen
+A048,Storm,Guinea pig,2,0.7,kg,no,Oslo
+A049,Mango,Dog,15,8.8,kg,yes,Bergen
+A050,Fluffy,cAT,17,5600,G,y,Trondheim
+A051,Snoopy,Rabbit,1,2.9,kg,N,Oslo
+A052,Mango,Cat,17,5.0,kg,NO,Bergen 
+A053,,Dog,4,20.5,KG,yes,Trondheim
+A054,,cAT,10,3100,G,no,Trondheim
+A055,Willow,Dog,,34.3,kg,yes,Trondheim
+A056,Peanut,dOG,15,7.3,kg,yes,Oslo
+A057,Willow,Dog,,39.0,kg,yes,TRONDHEIM
+A058,,Dog,,12.0,kg,yes,Trondheim
+A059,Snoopy,Dog,8,14.7,Kg,yes,Bergen
+A060,,Dog,,7.3,kg,NO,Trondheim
+A061,Hugo,Dog,7,18.4,kg,yes,Oslo
+A062,,Cat,1,4.6,kg,no,Bergen
+A063,Felix,Dog,14,18.6,kg,Y, Bergen
+A064,Felix,Dog,3,36.4,Kg,yes,Oslo
+A065,,Cat,,0,kg,no,Trondheim
+A066,Gizmo,Dog,7,5.1,kg,Y,Trondheim
+A067,Nala,DOG,,6.7,kg,yes,Bergen
+A068,Ruby,DOG,13,28.2,kg,y,Bergen
+A069,Coco,Cat,0,3.9,kg,yes,Bergen
+A070,Leo,Dog,0,20.0,kg,yes,Oslo
+A071,Muffin,dOG,9,13.0,kg,yes,Oslo
+A072,Gizmo,Dog,5,32.8,kg,YES,Trondheim
+A073,Hugo,Cat,6,3.7,kg,yes,Oslo
+A074,Gizmo,Cat,17,6.0,kg,yes,Bergen
+A075,Pepper,dOG,12,16.8,kg,yes,Bergen
+A076,Rocky,DOG,14,25.7,kg,yes,Oslo
+A077,Thor,Cat,17,5.9,kg,yes,Bergen
+A078,,gUINEA PIG,,0.9,kg,Yes,Trondheim
+A079,Buster,Cat,,3.1,kg,yes,Oslo
+A080,Willow,Dog,9,12.4,kg,yes,Trondheim
+A081,Muffin,Rabbit,5,2.6,kg,yes,Oslo
+A082,Thor,Ginea pig,6,1.1,kg,yes,Oslo
+A083,Frida,Dog,,18.9,Kg,y,Oslo
+A084,Max,Guinea pig,5,1.3,kg,yes,Oslo
+A085,Charlie,Dog,12,5.3,kg,no,Trondheim
+A086,Leo,Cat,17,3.2,kg,no,Oslo
+A087,Jasper,Cat,4,3300,g,yes,Trondheim
+A088,Mons,dog,2,14.9,kg,yes,Bergen
+A089,Kasper,Cat,6,5.5,kg,yes,Bergen
+A090,Frida,Dog,9,9.5,kg,No,Trondheim
+A091,Sky,Cat,2,3.7,kg,yes,Oslo
+A092,Odin,Dog,7,5.5,kg,yes,TRONDHEIM
+A093,Olive,Cat,2,5.0,kg,yes,Oslo
+A094,Molly,Dog,7,27.2,kg,YES,Trondheim
+A095,Sofie,Guinea pig,6,0.8,kg,no,Oslo
+A096,Storm,Cat,10,4.7,kg,yes,Bergen
+A097,Fluffy,Cat,2,5000,g,yes,Trondheim
+A098,Storm,Dog,7,38.1,kg,yes,bergen
+A099,Snoopy,Dog,2,31.6,kg,yes,Bergen
+A100,Milo,dog,10,26.8,kg,Yes,Bergen
+A101,Daisy,guinea pig,7,0.9,kg,Yes,Oslo
+A102,Luna,Dog,6,-3,kg,no,Oslo
+A103,Tiger,rABBIT,1,2.6,kg,,Oslo
+A104,Charlie,Cat,6,4.5,kg,yes,Oslo
+A105,Tassen,Rabbit,7,2.6,kg,no,Bergen
+A106,Mango,Rabbit,8,2.4,kg,no,Oslo
+A107,Buster,guinea pig,2,0.6,kg,yes,Oslo
+A108,,Guinea pig,5,600,g,yes, Bergen
+A109,Peanut,Cat,5,4000,g,yes,Trondheim
+A110,Sky,Cat,3,3.2,kg,YES,Bergen
+A111,Tiger,Cat,10,5.9,kg,yes,Oslo
+A112,Biscuit,Cat,3,3.2,kg,yes,TRONDHEIM
+A113,Rocky,Dog,0,9.2,kg,yes,Oslo
+A114,Pus,dOG,0,35.0,kg,N,Bergen
+A115,Snoopy,Dog,6,21.6,kg,yes,oslo
+A116,Oreo,Dog,13,13.7,kg,no,Bergen
+A117,Peanut,Dog,7,18.1,kg,,Bergen
+A118,Gizmo,Dog,5,18.0,kg,,Bergen
+A119,Bamse,Dogg,,15.3,kg,no,Trondheim
+A120,Nala,Dog,1,22.0,KG,yes,Bergen
+A121,Storm,CAT,0,2.6,kg,yes,Oslo
+A122,Willow,DOG,8,15.2,kg,yes,Oslo
+A123,Ruby,Cat,6,3.0,kg,yes,Oslo
+A124,Sofie,Guinea pig,2,1.0,kg,no,Oslo
+A125,Buster,Cat,16,3.3,kg,yes,TRONDHEIM
+A126,Tassen,Cat,10,4.5,kg,yes,Oslo
+A127,Charlie,Cat,9,4.1,kg,yes,Oslo
+A128,Kira,Dog,3,11.5,kg,yes,Bergen 
+A129,Thor,cat,13,2.8,kg,n,Trondheim
+A130,Freya,Guinea pig,2,1100,g,yes,Trondheim
+A131,Peanut,Dog,10,13.0,kg,yes,Bergen
+A132,Mango,Dog,8,20.6,kg,,Trondheim
+A133,Willow,DOG,10,10.5,kg,no,Bergen
+A134,Pepper,Dog,9,9.7,kg,yes,Oslo
+A135,Milo,Rabbit,7,1800,g,yes,Trondheim
+A136,Gizmo,Dog,1,39.3,kg,n,Bergen
+A111,Tiger,Cat,10,5.9,kg,yes,Oslo
+A137,Biscuit,Dog,14,37.3,kg,yes,Oslo
+A138,Bella,Dog,10,8.6,kg,unknown,Oslo
+A139,Tassen,Cat,16,3.5,kg,yes,Bergen
+A140,Biscuit,Dog,13,21.6,kg,yes,Oslo
+A141,Daisy,Cat,6,3100,g,yes,Bergen
+A142,Nemo,CAT,18,2.8,kg,yes,Bergen
+A143,Mango,Dog,8,11.6,kg,yes,Bergen
+A144,Leo,cAT,7,2.9,kg,no,Trondheim
+A145,Bella,dOG,13,14.0,kg,no,Oslo
+A146,Felix,dOG,9,29.0,kg,n,Trondheim
+A147,Oreo,Cat,,5400,g,,Trondheim
+A148,Peanut,Ginea pig,7,1200,g,yes,Bergen
+A076,Rocky,DOG,14,25.7,kg,yes,Oslo
+A149,Max,Dog,,34.4,kg,yes,Trondheim
+A150,Gizmo,DOG,4,18.4,kg,yes,Oslo
+A151,Sky,Rabbit,2,1.3,kg,no,Bergen
+A152,Fluffy,Dog,6,30.5,kg,yes,Trondheim
+A153,Bella,Cat,4,-0.5,kg,yes,Bergen
+A154,Molly,Cat,,3.5,kg,yes,Trondheim
+A155,Ruby,Dog,7,8.7,kg,yes,Oslo
+A156,Tassen,Dog,4,10.1,kg,no,Oslo
+A157,Toby,Cat,2,4.6,kg,yes,Bergen
+A158,Nala,Dog,12,5.7,kg,yes,Oslo
+A159,Muffin,Dog,14,29.5,kg,yes,Bergen
+A160,Hugo,Dog,14,14.0,kg,yes,Oslo
+A161,Daisy,dOG,,33.4,kg,yes,Bergen
+A162,Freya,Dog,3,17.4,kg,yes,Oslo
+A163,Bamse,Dog,11,7.2,kg,y,Trondheim
+A164,,Dog,2,9.0,kg,yes,Trondheim
+A165,Ruby,Rabbit,3,1.1,kg,yes,Bergen
+A166,Bamse,Guinea pig,2,0.7,Kg,no,Bergen
+A167,Sofie,Cat,1,3.7,kg,yes,Bergen
+A168,Willow,Cat,1,3700,g,y,TRONDHEIM
+A169,Freya,Rabbit,2,1.6,kg,,Oslo
+A170,Iris,rabbit,2,3.0,kg,yes,Bergen
+A171,Oreo,Dog,6,25.6,kg,yes,Bergen
+A172,Mango,Dog,14,17.2,kg,no,Oslo
+A173,Frida,Guinea pig,1,600,g,no,Bergen
+A174,,cat,13,3.1,kg,n,Trondheim
+A175,Muffin,Dog,6,20.0,KG,yes,bergen
+A176,Nemo,Dog,7,29.4,kg,yes,oslo
+A177,Sky,Dog,,24.6,kg,,Trondheim
+A178,Nemo,rabbit,8,1.5,kg,yes,Oslo
+A179,Kira,Dog,8,12.9,kg,YES,Oslo
+A180,Trofast,Dog,3,39.0,kg,,Trondheim
+A181,Pus,Dog,10,13.5,kg,yes,Oslo
+A182,Sasha,Cat,11,4.7,kg,yes,Trondheim
+A183,Leo,Dog,9,37.7,kg,unknown,Trondheim
+A184,Tiger,cat,0,5.6,kg,yes,Bergen
+A185,Max,Rabbit,,2300,G,yes,Trondheim
+A186,Gizmo,Cat,1,2.7,kg,yes,Bergen 
+A187,Sofie,Cat,0,2.9,kg,yes,Oslo
+A188,Storm,Cat,6,2.9,kg,yes, Oslo
+A189,,Dog,3,11.7,kg,yes,Oslo
+A190,Bamse,Cat,7,6.2,kg,yes,Bergen
+A191,,Cat,6,3.7,kg,yes,Bergen
+A192,Leo,DOG,10,24.8,kg,unknown,Trondheim
+A193,Thor,DOG,13,26.6,kg,no,Oslo
+A194,Freya,Cat,6,2700,g,,Trondheim
+A195,Ziggy,Dog,13,24.7,kg,yes,Oslo
+A196,Tiger,Rabbit,5,1.8,kg,no,Trondheim
+A197,Odin,Dog,,7.7,kg,unknown,Trondheim
+A198,Nemo,Cat,4,5.6,kg,no,Oslo
+A199,Rocky,Cat,0,5.4,kg,no,Oslo
+A200,Sky,Dog,10,29.4,kg,yes,oslo
+A201,Loki,Dog,,11.9,kg,NO,Trondheim
+A202,,Cat,2,3.3,kg,no,Oslo
+A203,Molly,Cat,11,4.8,kg,yes,Oslo
+A204,Muffin,Cat,10,5.3,Kg,yes,Oslo
+A205,,Dog,,5.8,kg,yes,OSLO
+A206,Gizmo,dog,,35.6,kg,Yes,Trondheim
+A207,Kira,Dog,,15.5,kg,yes,Oslo
+A208,Mango,Cat,15,6.4,kg,yes,Oslo
+A209,Mons,Dog,13,35.8,kg,No,Trondheim
+A210,Luna,Dog,13,15.7,kg,no,Bergen
+A211,Daisy,cat,,4600,g,false,Trondheim
+A212,,Cat,16,4100,g,yes,Trondheim
+A213,,guinea pig,0,0.9,kg,no,Bergen
+A214,Freya,RABBIT,9,2.7,kg,true,Oslo
+A215,,Rabbit,5,2.9,kg,yes,Oslo
+A216,,Dog,8,34.2,kg,y,Trondheim
+A217,Coco,cat,0,6000,g,yes,Trondheim
+A218,Kasper,Cat,1,2.9,kg,yes,Bergen
+A219,Nala,Dog,5,7.4,kg,no,Bergen
+A220,,Dog,4,30.6,kg,yes,Trondheim
+A221,Leo,Dog,5,4.3,kg,yes,Oslo
+A222,Thor,Dog,,29.4,kg,yes,Trondheim
+A223,Coco,guinea pig,2,1.2,kg,yes,Oslo
+A224,,Cat,8,4.3,kg,yes,Oslo
+A225,Leo,Dog,5,4.5,kg,yes,Bergen
+A226,Jasper,DOG,9,17.7,kg,unknown,Trondheim
+A227,Trofast,CAT,,6.2,kg,unknown,Trondheim
+A228,Mango,dOG,15,7.6,kg,yes,Bergen
+A229,Nemo,cat,0,3.8,kg,no,Oslo
+A230,Peanut,Dog,7,27.6,kg,no,Oslo
+A231,Lady,Cat,15,5.7,kg,yes,Bergen
+A232,Tassen,Dog,8,21.2,kg,yes,Bergen
+A233,Gizmo,dog,2,27.3,kg,n,Trondheim
+A234,Hugo,cat,9,5.9,kg,yes,Bergen
+A228,Mango,dOG,15,7.6,kg,yes,Bergen
+A235,Buster,Cat,1,5.3,kg,no,Oslo
+A236,Peanut,Cat,6,3800,G,yes,Trondheim
+A201,Loki,Dog,,11.9,kg,NO,Trondheim
+A237,Tiger,Guinea pig,4,0.9,kg,yes,Bergen
+A238,Olive,Cat,4,4.7,kg,no,Bergen
+A239,Freya,Dog,6,10.3,kg,yes,Bergen
+A043,Fluffy,Dog,10,10.4,kg,yes,Bergen
+A240,Kasper,Cat,16,5.3,kg,,Bergen
+A241,Freya,Dog,12,33.4,kg,yes,Bergen
+A242,Daisy,gUINEA PIG,2,1300,g,y,Trondheim
+A243,Ruby,Cat,17,4.8,kg,yes,Bergen
+A244,Buster,Dog,1,5.3,kg,yes,Bergen
+A245,Bamse,DOG,15,12.9,kg,no,Oslo
+A246,Odin,Dog,6,36.6,kg,YES,Oslo
+A247,Bella,dOG,8,16.0,KG,Yes,Bergen
+A248,Ruby,Rabbit,8,2.4,kg,no,Oslo
+A249,,Cat,4,3600,g,no,Bergen
+A241,Freya,Dog,12,33.4,kg,yes,Bergen
+A250,Leo,Rabbit,6,2.0,kg,yes,Oslo
+A251,Luna,Dog,9,26.6,kg,YES,Bergen
+A252,Molly,DOG,3,30.1,kg,No,Bergen
+A253,Pelle,Dog,6,30.9,kg,no,Trondheim
+A254,Sky,Guinea pig,2,1000,g,Y,Trondheim
+A255,Pepper,Cat,1,3.6,kg,yes,Oslo
+A256,Sky,Dog,15,20.6,kg,false,Bergen
+A257,,cAT,5,6.2,kg,no,Oslo
+A258,Luna,Rabbit,9,3.0,kg,yes,Oslo
+A259,Bamse,Dog,,22.7,kg,y,Trondheim
+A260,Mango,Cat,,4400,g,no,TRONDHEIM
+A261,Fluffy,DOG,2,29.3,kg,,Trondheim
+A262,Pepper,Rabbit,1,1.1,kg,no,Oslo
+A263,Hugo,Dog,1,22.6,kg,YES,Oslo
+A264,Oreo,Rabbit,,2000,g,y,Trondheim
+A265,Peanut,Dog,15,19.8,kg,yes,Bergen
+A266,Tiger,CAT,3,6100,G,true,Trondheim
+A267,Felix,Guinea pig,6,0.9,kg,yes,Bergen 
+A268,Ruby,Guinea pig,7,0.8,kg,yes,Oslo
+A269,Fluffy,Guinea pig,3,1.1,kg,yes,Oslo
+A270,Freya,Dog,,38.4,Kg,yes,Trondheim
+A271,Sasha,Dog,10,33.8,kg,yes,Oslo
+A272,Ziggy,Cat,11,3.2,KG,yes,Oslo
+A273,Molly,Dog,3,9.3,kg,yes,Oslo
+A274,Tiger,Guinea pig,52,0.9,kg,yes,Bergen
+A275,Charlie,Cat,7,5800,g,yes,Bergen
+A276,Tiger,Cat,12,5.6,kg,true,Oslo
+A074,Gizmo,Cat,17,6.0,kg,yes,Bergen
+A277,Jasper,Rabbit,,2300,g,yes,Trondheim
+A278,Kira,Guinea pig,1,0.9,kg,no,Bergen 
+A279,Kasper,Dog,3,29.4,kg,YES,Oslo
+A280,Peanut,Guinea pig,7,700,g,yes,trondheim
+A231,Lady,Cat,15,5.7,kg,yes,Bergen
+A281,,Dog,7,8.8,kg,yes,Bergen
+A282,Pelle,Cat,12,4300,g,Y,Trondheim
+A283,,Guinea pig,,1.3,kg,yes,Trondheim
+A284,Tiger,Dog,1,9.5,kg,no,Oslo
+A285,,DOG,6,6.0,kg,yes,Bergen
+A286,Pepper,Cat,7,4.3,kg,true,Oslo
+A287,Nemo,Cat,12,4.9,kg,yes,Oslo
+A248,Ruby,Rabbit,8,2.4,kg,no,Oslo
+A288,Pus,Cat,5,2.7,kg,yes,Oslo
+A289,Sky,Dog,14,28.6,kg,yes,Bergen
+A290,Iris,Rabbit,9,2.4,kg,yes,Bergen
