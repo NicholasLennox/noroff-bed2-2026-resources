@@ -20,6 +20,7 @@ The September 2026 export is in `data/shelter_intake_2026-09.csv`. It has 300 ro
 - [Stage 2: Clean the data](#stage-2-clean-the-data)
 - [Stage 3: Read the report and refine](#stage-3-read-the-report-and-refine)
 - [Reflection](#reflection)
+- [Bonus: More rules, less code](#bonus-more-rules-less-code)
 - [References](#references)
 
 ## Getting started
@@ -99,12 +100,12 @@ A015,Tiger,Cat,38,5.1,kg,no,OSLO
 
 **Goal:** a data quality report in `cleaning-rules.md` with at least four problems: the example already there, and three you found yourself.
 
-1. Read the sample above row by row, with the website's needs in mind. A value can be correct in the export and still not be what the website needs. For each problem, decide which dimension of data quality it falls under: completeness, validity, consistency, uniqueness, accuracy or timeliness.
+1. Read the sample above row by row, with the website's needs in mind. A value can be correct in the export and still not be what the website needs. For each problem, decide which dimension of data quality it falls under: completeness, validity, consistency, uniqueness or accuracy.
 2. Read the raw data summary from `npm start`. It shows how many values are missing in each column across all 300 rows, not just the sample.
 3. Open the full CSV and look through it. The sample shows what kinds of problems there are, but not how often each one happens or which shelters it comes from.
 4. Add each problem to the data quality report table: the issue, an example row, the dimension, and what it could do to the adoption website or the intake report.
 
-There are more than four problems in this data. Pick the ones you want to handle, and take on more if you want a challenge. If you want to see every value used in a column, you can write a small function in `summary.js` that counts them.
+There are many more problems in this data than that. Three of your own is the minimum, so pick the ones you want to handle first. The bonus at the end is about going further. If you want to see every value used in a column, you can write a small function in `summary.js` that counts them.
 
 **Check:** your report has at least four rows, each naming a dimension.
 
@@ -157,6 +158,13 @@ Answer these in your own words. Your dev log should help.
    ```
 
    Read the error. How should the line have been written so that the name could keep its comma? Remove the line again when you're done.
+
+## Bonus: More rules, less code
+
+1. **Find as many as you can.** Go back to your data quality report and handle every problem you can find in the data, not just the three the stages asked for. Each one goes through the same steps: a row in the report, a rule in `cleaning-rules.md`, and a function in the chain.
+2. **Refactor.** Read through `cleaningRules.js` and look for functions that do nearly the same thing. Change your code so that one function can do the job of several rules, without changing what the cleaned CSV looks like.
+
+**Check:** run `npm start` before and after you refactor. The cleaning report and the cleaned CSV should be the same both times.
 
 ## References
 

@@ -15,7 +15,7 @@ Each problem in the report that you decide to handle becomes a rule here, and th
 Copy this block for each new rule:
 
 - **Found**: the problem, with an example row
-- **Dimension**: completeness / validity / consistency / uniqueness / accuracy / timeliness
+- **Dimension**: completeness / validity / consistency / uniqueness / accuracy
 - **Why it matters**: what goes wrong for the adoption website or the intake report
 - **Action**: fix / flag / reject
 - **Function**:
