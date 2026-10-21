@@ -4,13 +4,13 @@
 
 This kata is about designing a dimensional model from an operational database. You read the normalised schema of a gym chain, find the business events in it, and model them as fact tables with dimension tables around them, arranged as star schemas.
 
-There's no database to build and no code to run. Work on paper or in a diagram tool such as [draw.io](https://www.drawio.com/). You check each model by planning the query a report would run against it and writing the shell of that query: which tables it joins, and what it selects, filters and groups by.
+There's no database to build and no code to run. Work on paper or in a diagram tool such as [draw.io](https://www.drawio.com/). You check each model by planning the query a report would run against it and writing an outline of that query: which tables it joins, and what it selects, filters and groups by.
 
 Use the [Data Warehouse Architecture and the Dimensional Model lecture](../../01-dbw-architecture/lecture.md) and Microsoft's [Understand star schema](https://learn.microsoft.com/en-us/power-bi/guidance/star-schema) page rather than asking an AI. Name your tables the way the lecture does, with `fact_` and `dim_` in front.
 
 There are two reports, and you take each one along the same path: first through the operational database, then through a star schema. Bookings go first, with a worked example to follow. Check-ins go second, and you work them out yourself.
 
-In stage 1 you plan both reports against the operational database. In stage 2 you model a star schema for bookings. In stage 3 you model a second star for check-ins, on the same diagram as the first.
+First you plan both reports against the operational database. Then you model a star schema for bookings, and finally a second star for check-ins, on the same diagram as the first.
 
 ## The gym chain
 
@@ -86,15 +86,17 @@ Some examples of what the rows mean:
 
 Pulse's management wants two reports:
 
-> **Report 1:** Number of bookings and total booking revenue, per class category, per club, per month, for 2025.
+> **The bookings report:** Number of bookings and total booking revenue, per class category, per club, per month, for 2025.
 >
-> **Report 2:** Number of check-ins and total minutes spent in the gym, per club, per membership type, per weekday, for January to March 2026.
+> **The check-ins report:** Number of check-ins and total minutes spent in the gym, per club, per membership type, per weekday, for January to March 2026.
 
 ## Stage 1: Plan the reports against the operational database
 
-**Goal:** a planned query shell for each report against the operational database.
+**Goal:** a planned query outline for each report against the operational database.
 
-### Worked example: Report 1
+### Worked example: the bookings report
+
+> **The bookings report:** Number of bookings and total booking revenue, per class category, per club, per month, for 2025.
 
 Start by listing what the report is looking for, and where each piece lives:
 
@@ -115,7 +117,7 @@ booking --> class_session --> class_type --> class_category
                   +---------> studio --> club
 ```
 
-That path gives the shell of the query. The angle brackets say what goes in each place, and the comments say why each table is joined:
+That path gives the outline of the query. The angle brackets say what goes in each place, and the comments say why each table is joined:
 
 ```
 SELECT   <club name>, <category name>, <month of the class>,
@@ -132,36 +134,37 @@ GROUP BY <club name>, <category name>, <month of the class>
 
 That's five joins. Two of them, `class_type` and `studio`, are there only to get from one table to the next. The report doesn't use a single column from either.
 
-### Your turn: Report 2
+### Your turn: the check-ins report
 
-1. Plan Report 2 the same way: a table of what it's looking for and where each piece lives, the path from the table holding the numbers, and the query shell with a comment on every join.
+> **The check-ins report:** Number of check-ins and total minutes spent in the gym, per club, per membership type, per weekday, for January to March 2026.
+
+1. Plan the check-ins report the same way: a table of what it's looking for and where each piece lives, the path from the table holding the numbers, and the query outline with a comment on every join.
 2. Count the joins, and mark the ones that are only there to reach the next table.
 
 ## Stage 2: Model the bookings star
 
-**Goal:** a star schema for bookings, and Report 1's query shell rewritten against it.
+**Goal:** a star schema for bookings, and the bookings report's query outline rewritten against it.
 
-1. Name the business event behind Report 1. That event is your fact table.
+> **The bookings report:** Number of bookings and total booking revenue, per class category, per club, per month, for 2025.
+
+1. Name the business event behind the bookings report. That event is your fact table.
 2. List the fact table's columns: the foreign keys to its dimensions, its measures, and anything else that belongs on the fact.
 3. For each dimension, list its columns. Each dimension should be a single table, so anything the operational schema spread across several tables has to end up as columns on one.
 4. Draw the star.
-5. **Check:** rewrite Report 1's query shell against your star, in the same form as the worked example. Count the joins and compare them with the worked example's five. If any part of the report needs more than one join to reach, go back to step 3.
+5. **Check:** write the query outline for the bookings report again, in the same form as the worked example, this time using your `fact_` and `dim_` tables instead of the operational ones. Count its joins and compare them with the worked example's five. If any part of the report needs more than one join to reach, go back to step 3.
 
 ## Stage 3: Model the check-ins star
 
-**Goal:** a second star for check-ins, drawn on the same diagram as the first, and Report 2's query shell rewritten against it.
+**Goal:** a second star for check-ins, drawn on the same diagram as the first, and the check-ins report's query outline rewritten against it.
 
-1. Model Report 2 the same way, starting from your plan in stage 1: the event, the fact table and its columns, and the dimensions.
+> **The check-ins report:** Number of check-ins and total minutes spent in the gym, per club, per membership type, per weekday, for January to March 2026.
+
+1. Model the check-ins report the same way, starting from the plan you made against the operational database: the event, the fact table and its columns, and the dimensions.
 2. Draw both stars together on one diagram. If a dimension appears in both, draw it once and connect it to both fact tables.
-3. **Check:** rewrite Report 2's query shell against your model. Every join should go straight from the fact to a dimension.
-4. Management now wants one more report:
-
-   > **Report 3:** Per club, per month, for 2025: the number of check-ins next to the number of class bookings.
-
-   Plan it with a table of what it's looking for and where each piece lives in your model. You don't need to write its shell.
+3. **Check:** write the query outline for the check-ins report again, this time using your `fact_` and `dim_` tables instead of the operational ones. Count its joins. Then count the joins in the check-ins outline you wrote against the operational database, and write both numbers down.
 
 ### Reflection
 
-- Report 1 went from five joins to three when it moved to a star, but Report 2 didn't get shorter. What changed about Report 2's joins instead?
-- **Break it.** Give each star its own club table, and spell one club *Pulse Bergen Sentrum* in one and *Pulse Bergen sentrum* in the other. What happens to that club in Report 3?
-- A member moves from Bergen to Oslo in June, and the warehouse overwrites the home club on her `dim_member` row. Which city do her January check-ins now count under?
+- The bookings report went from five joins to three when it moved to a star. The check-ins report has the same number of joins in both versions. If the star doesn't make its query shorter, what else do you gain by moving check-ins into a star?
+- The operational database overwrites a member's home club when she moves from Bergen to Oslo. Does the warehouse have to overwrite it too?
+- Management also wants the number of check-ins next to the number of class bookings, per club, per month. You don't need to model it. Which tables in your diagram would that report use?
