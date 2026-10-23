@@ -394,6 +394,10 @@ INSERT INTO dim_customer (webshop_id, loyalty_card, name, email, city)
 VALUES (NULL, NULL, 'Unknown', NULL, 'Unknown');
 ```
 
+| `customer_key` | `webshop_id` | `loyalty_card` | `name` | `email` | `city` |
+|---|---|---|---|---|---|
+| 1 | NULL | NULL | Unknown | NULL | Unknown |
+
 Every till sale without a loyalty card will point at customer 1. The Kimball Group gives the same rule: a fact table's foreign keys must never be `NULL`, so the dimension gets a default row with its own surrogate key for the unknown case ([Nulls in Fact Tables](https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/fact-table-null/)).
 
 The Unknown row and the Web row both carry `NULL`s, but they mean different things. The Web row's `store_city` is `NULL` because a city doesn't apply to the web shop. The Unknown customer does exist and does live somewhere; the warehouse just doesn't know where. That's why its `city` is the word `Unknown`, which a report can show, rather than `NULL`.
@@ -402,7 +406,7 @@ The Unknown row and the Web row both carry `NULL`s, but they mean different thin
 
 ```sql
 SELECT c.customer_id,
-       c.first_name + ' ' + c.last_name,
+       c.first_name + ' ' + c.last_name AS name,
        c.email,
        c.city
 FROM online_store.dbo.customer c;
@@ -410,12 +414,12 @@ FROM online_store.dbo.customer c;
 
 That gives 13 rows, one per web shop customer. Here are two of them:
 
-| `customer_id` | (No column name) | `email` | `city` |
+| `customer_id` | `name` | `email` | `city` |
 |---|---|---|---|
 | 88213 | Ana Hansen | ana.hansen@example.no | Bergen |
 | 88225 | Emil Strand | emil.strand@example.no | Stavanger |
 
-`first_name + ' ' + last_name` joins the two name columns into one, in the same shape as the tills' `full_name`.
+`first_name + ' ' + last_name` joins the two name columns into one, in the same shape as the tills' `full_name`. `AS name` gives the result a column name; without it, SQL Server shows the column as `(No column name)`.
 
 Ana also has a loyalty card, and `dim_customer` is supposed to hold one row per person with both her keys on it. Nothing in this query knows about her card.
 
@@ -424,7 +428,7 @@ The card is in `tills.dbo.loyalty_member`, and the column the two systems share 
 ```sql
 SELECT c.customer_id,
        m.card_no,
-       c.first_name + ' ' + c.last_name,
+       c.first_name + ' ' + c.last_name AS name,
        c.email,
        c.city
 FROM online_store.dbo.customer c
@@ -433,7 +437,7 @@ LEFT JOIN tills.dbo.loyalty_member m ON m.email = c.email;
 
 The same two rows now look like this:
 
-| `customer_id` | `card_no` | (No column name) | `email` | `city` |
+| `customer_id` | `card_no` | `name` | `email` | `city` |
 |---|---|---|---|---|
 | 88213 | L-55190 | Ana Hansen | ana.hansen@example.no | Bergen |
 | 88225 | NULL | Emil Strand | emil.strand@example.no | Stavanger |
@@ -455,6 +459,13 @@ FROM online_store.dbo.customer c
 LEFT JOIN tills.dbo.loyalty_member m ON m.email = c.email;
 ```
 
+That adds 13 rows, keys 2 to 14. Ana and Emil are now in `dim_customer`:
+
+| `customer_key` | `webshop_id` | `loyalty_card` | `name` | `email` | `city` |
+|---|---|---|---|---|---|
+| 5 | 88213 | L-55190 | Ana Hansen | ana.hansen@example.no | Bergen |
+| 8 | 88225 | NULL | Emil Strand | emil.strand@example.no | Stavanger |
+
 **The till-only customers.** The 8 loyalty members who also shop online are now in `dim_customer`. The 5 who only shop at the tills, Lars among them, are not. Load the members whose email isn't in the web shop:
 
 ```sql
@@ -465,15 +476,16 @@ WHERE m.email NOT IN (SELECT email FROM online_store.dbo.customer);
 GO
 ```
 
-Without the `WHERE`, Ana would get a second row, and her till sales and web sales would be split across two customers.
+That adds 5 rows, keys 15 to 19. Here are two of them, Henrik and Lars:
 
-That gives 19 rows: Unknown, plus 18 people.
+| `customer_key` | `webshop_id` | `loyalty_card` | `name` | `email` | `city` |
+|---|---|---|---|---|---|
+| 15 | NULL | L-58830 | Henrik Moen | henrik.moen@example.no | Bergen |
+| 16 | NULL | L-60321 | Lars Johansen | lars.johansen@example.no | Oslo |
 
-| `customer_key` | `webshop_id` | `loyalty_card` | `name` | `city` |
-|---|---|---|---|---|
-| 1 | NULL | NULL | Unknown | Unknown |
-| 5 | 88213 | L-55190 | Ana Hansen | Bergen |
-| 16 | NULL | L-60321 | Lars Johansen | Oslo |
+Their `webshop_id` is `NULL`, because neither has ever shopped online. Without the `WHERE`, Ana would get a second row here, and her till sales and web sales would be split across two customers.
+
+`dim_customer` now has 19 rows: Unknown, plus 18 people.
 
 ### 3.5 `dim_product`
 
